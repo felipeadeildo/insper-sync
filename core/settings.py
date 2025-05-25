@@ -46,7 +46,8 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+    # proxy behinded
+    SECURE_SSL_REDIRECT = False
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 else:
     CSRF_TRUSTED_ORIGINS = [
