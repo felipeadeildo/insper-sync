@@ -45,9 +45,6 @@ jobs:
           CELERY_RESULT_BACKEND=redis://localhost:6379/0
           EOF
 
-      - name: Run migrations
-        run: python manage.py migrate
-
       - name: Run tests
         run: python manage.py test -v 2
 
