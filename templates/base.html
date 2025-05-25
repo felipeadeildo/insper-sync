@@ -44,9 +44,11 @@
 
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
-          <li><a href="/" class="hover:text-primary">Início</a></li>
-          <li><a href="#sobre" class="hover:text-primary">Como Funciona</a></li>
-          <li><a href="#contato" class="hover:text-primary">Suporte</a></li>
+          {% if request.resolver_match.url_name == 'home' or not user.is_authenticated %}
+            <li><a href="/" class="hover:text-primary">Início</a></li>
+            <li><a href="#sobre" class="hover:text-primary">Como Funciona</a></li>
+            <li><a href="#contato" class="hover:text-primary">Suporte</a></li>
+          {% endif %}
         </ul>
       </div>
 
@@ -108,10 +110,14 @@
             tabindex="0"
             class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <li><a href="/">Início</a></li>
-            <li><a href="#sobre">Como Funciona</a></li>
-            <li><a href="#contato">Suporte</a></li>
-            <li><hr class="my-1"></li>
+            {% if request.resolver_match.url_name == 'home' or not user.is_authenticated %}
+              <li><a href="/">Início</a></li>
+              <li><a href="#sobre">Como Funciona</a></li>
+              <li><a href="#contato">Suporte</a></li>
+              {% if user.is_authenticated %}
+                <li><hr class="my-1"></li>
+              {% endif %}
+            {% endif %}
             {% if user.is_authenticated %}
               <li>
                 <a href="{% url 'dashboard' %}" class="flex items-center gap-2">
@@ -132,6 +138,9 @@
                 </a>
               </li>
             {% else %}
+              {% if request.resolver_match.url_name != 'home' %}
+                <li><hr class="my-1"></li>
+              {% endif %}
               <li>
                 <a href="/" class="flex items-center gap-2">
                   <i data-lucide="log-in" class="w-4 h-4"></i>
@@ -160,14 +169,14 @@
       <nav>
         <div class="grid grid-flow-col gap-4">
           <a
-            href="https://github.com"
+            href="https://github.com/felipeadeildo/insper-sync"
             class="link link-hover"
             aria-label="GitHub"
           >
             <i data-lucide="github" class="w-6 h-6"></i>
           </a>
           <a
-            href="mailto:suporte@insper-sync.dev"
+            href="mailto:fa@insper.dev"
             class="link link-hover"
             aria-label="Email"
           >
