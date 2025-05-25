@@ -51,6 +51,47 @@
       </div>
 
       <div class="navbar-end">
+        <!-- User Menu / Login Button -->
+        {% if user.is_authenticated %}
+          <!-- User Dropdown (Desktop) -->
+          <div class="dropdown dropdown-end hidden lg:flex mr-4">
+            <div tabindex="0" role="button" class="btn btn-ghost">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              <span>{{ user.username|default:"Usuário" }}</span>
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-48">
+              <li>
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-2">
+                  <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                  Dashboard
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'setup_credentials' %}" class="flex items-center gap-2">
+                  <i data-lucide="settings" class="w-4 h-4"></i>
+                  Configurações
+                </a>
+              </li>
+              <li><hr class="my-1"></li>
+              <li>
+                <a href="{% url 'logout' %}" class="flex items-center gap-2 text-error">
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  Sair
+                </a>
+              </li>
+            </ul>
+          </div>
+        {% else %}
+          <!-- Login Button (Desktop) -->
+          <div class="hidden lg:flex mr-4">
+            <a href="/" class="btn btn-primary">
+              <i data-lucide="log-in" class="w-4 h-4"></i>
+              Entrar
+            </a>
+          </div>
+        {% endif %}
+
         <!-- Theme Toggle -->
         <label class="swap swap-rotate mr-4">
           <input type="checkbox" class="theme-controller" value="dark" />
@@ -70,6 +111,34 @@
             <li><a href="/">Início</a></li>
             <li><a href="#sobre">Como Funciona</a></li>
             <li><a href="#contato">Suporte</a></li>
+            <li><hr class="my-1"></li>
+            {% if user.is_authenticated %}
+              <li>
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-2">
+                  <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                  Dashboard
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'setup_credentials' %}" class="flex items-center gap-2">
+                  <i data-lucide="settings" class="w-4 h-4"></i>
+                  Configurações
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'logout' %}" class="flex items-center gap-2 text-error">
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  Sair ({{ user.username|default:"Usuário" }})
+                </a>
+              </li>
+            {% else %}
+              <li>
+                <a href="/" class="flex items-center gap-2">
+                  <i data-lucide="log-in" class="w-4 h-4"></i>
+                  Entrar
+                </a>
+              </li>
+            {% endif %}
           </ul>
         </div>
       </div>

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -99,6 +100,7 @@ def verify_token(request, token):
     return redirect("setup_credentials")
 
 
+@login_required
 def setup_credentials(request):
     """View para configurar credenciais do Insper"""
     if not request.user.is_authenticated:
@@ -119,7 +121,7 @@ def setup_credentials(request):
 
         # TODO: Criptografar a senha antes de salvar
         request.user.insper_username = insper_username
-        request.user.insper_password = insper_password  # TODO: criptografar
+        request.user.insper_password = insper_password
         request.user.credentials_configured = True
         request.user.save()
 
@@ -129,19 +131,7 @@ def setup_credentials(request):
     return render(request, "accounts/setup_credentials.html")
 
 
-def dashboard(request):
-    """Dashboard do usuário"""
-    if not request.user.is_authenticated:
-        return redirect("home")
-
-    if not request.user.email_verified:
-        messages.error(request, "Você precisa verificar seu email primeiro.")
-        return redirect("home")
-
-    if not request.user.credentials_configured:
-        messages.info(request, "Configure suas credenciais do Insper para continuar.")
-        return redirect("setup_credentials")
-
-    context = {}
-
-    return render(request, "accounts/dashboard.html", context)
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect("home")

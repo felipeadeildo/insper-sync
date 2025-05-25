@@ -130,6 +130,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom User Model
 AUTH_USER_MODEL = "accounts.User"
 
+LOGIN_URL = "home"
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "home"
+
 # Email Configuration
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
