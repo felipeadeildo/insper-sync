@@ -20,7 +20,7 @@ def send_verification_email(user_id):
     # Criar token de verificação
     token = EmailVerificationToken.objects.create(user=user)
 
-    base_url = f"https://{DOMAIN}/"
+    base_url = f"https://{DOMAIN}"
 
     verification_url = (
         f"{base_url}{reverse('verify_token', kwargs={'token': token.token})}"
