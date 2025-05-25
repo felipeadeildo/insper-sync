@@ -1,13 +1,11 @@
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
-from django.urls import reverse
 
 from .models import EmailVerificationToken, User
+from .tasks import send_verification_email
 
 
 def verify_email(request):
@@ -15,7 +13,6 @@ def verify_email(request):
     if request.method == "POST":
         email = request.POST.get("email", "").strip().lower()
 
-        # Validar se é email do Insper
         if not email.endswith(("@al.insper.edu.br", "@insper.edu.br")):
             messages.error(
                 request,
@@ -23,48 +20,21 @@ def verify_email(request):
             )
             return redirect("home")
 
-        # Criar ou buscar usuário
-        user, created = User.objects.get_or_create(
+        user, _ = User.objects.get_or_create(
             email=email, defaults={"name": email.split("@")[0]}
         )
 
-        # Criar token de verificação
-        token = EmailVerificationToken.objects.create(user=user)
-
-        # Enviar email de verificação
-        verification_url = request.build_absolute_uri(
-            reverse("verify_token", kwargs={"token": token.token})
-        )
-
-        # Renderizar template do email
-        email_html = render_to_string(
-            "emails/verify_email.html",
-            {
-                "verification_url": verification_url,
-                "user": user,
-            },
-        )
-
         try:
-            # Enviar email
-            send_mail(
-                subject="Verificação de Email - Insper Sync",
-                message=f"Acesse o link para verificar seu email: {verification_url}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                html_message=email_html,
-                fail_silently=False,
-            )
+            transaction.on_commit(lambda: send_verification_email.delay(user.pk))
 
             messages.success(
                 request,
                 f"Email de verificação enviado para {email}. Verifique sua caixa de entrada (e spam).",
             )
         except Exception:
-            # Em caso de erro no envio, mostrar o link para desenvolvimento
             messages.warning(
                 request,
-                f"Erro ao enviar email. Para desenvolvimento, acesse: {verification_url}",
+                "Erro ao processar solicitação de verificação. Tente novamente.",
             )
 
         return redirect("home")
