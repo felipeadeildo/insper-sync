@@ -1,6 +1,9 @@
 import os
 
 from celery import Celery
+from celery.app.task import Task
+
+Task.__class_getitem__ = classmethod(lambda cls, *args, **kwargs: cls)  # type: ignore[attr-defined]
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 
