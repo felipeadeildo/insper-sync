@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
+from core.utils import encrypt_insper_password, validate_insper_credentials
+
 from .models import EmailVerificationToken, User
 from .tasks import send_verification_email
 
@@ -89,14 +91,44 @@ def setup_credentials(request):
             messages.error(request, "Todos os campos são obrigatórios.")
             return render(request, "accounts/setup_credentials.html")
 
-        # TODO: Criptografar a senha antes de salvar
-        request.user.insper_username = insper_username
-        request.user.insper_password = insper_password
-        request.user.credentials_configured = True
-        request.user.save()
+        # Validar credenciais com o sistema do Insper
+        is_valid, user_data, error_message = validate_insper_credentials(
+            insper_username, insper_password
+        )
 
-        messages.success(request, "Credenciais configuradas com sucesso!")
-        return redirect("dashboard")
+        if not is_valid:
+            messages.error(
+                request,
+                f"Erro ao validar credenciais: {error_message or 'Credenciais inválidas'}",
+            )
+            return render(request, "accounts/setup_credentials.html")
+
+        try:
+            # Criptografar a senha antes de salvar
+            encrypted_password = encrypt_insper_password(insper_password)
+
+            # Salvar credenciais
+            request.user.insper_username = insper_username
+            request.user.insper_password = encrypted_password
+            request.user.credentials_configured = True
+
+            # Atualizar nome do usuário se disponível
+            if user_data and user_data.name and not request.user.name:
+                request.user.name = user_data.name
+
+            request.user.save()
+
+            messages.success(
+                request,
+                f"Credenciais configuradas com sucesso! Bem-vindo(a), {user_data.name if user_data else request.user.name}!",
+            )
+            return redirect("dashboard")
+
+        except Exception as e:
+            messages.error(
+                request, f"Erro ao salvar credenciais: {str(e)}. Tente novamente."
+            )
+            return render(request, "accounts/setup_credentials.html")
 
     return render(request, "accounts/setup_credentials.html")
 

@@ -70,6 +70,29 @@ class User(AbstractUser):
         """Verifica se o usuário pode sincronizar (email verificado e credenciais configuradas)"""
         return self.email_verified and self.credentials_configured and self.is_active
 
+    def has_insper_credentials(self) -> bool:
+        """Verifica se o usuário tem credenciais do Insper configuradas"""
+        return bool(self.insper_username and self.insper_password)
+
+    def update_insper_credentials(self, username: str, encrypted_password: str):
+        """
+        Atualiza as credenciais do Insper do usuário.
+
+        Args:
+            username: Nome de usuário do Insper
+            encrypted_password: Senha já criptografada
+        """
+        self.insper_username = username
+        self.insper_password = encrypted_password
+        self.credentials_configured = True
+        self.save(
+            update_fields=[
+                "insper_username",
+                "insper_password",
+                "credentials_configured",
+            ]
+        )
+
 
 class EmailVerificationToken(models.Model):
     """Token para verificação de email"""
