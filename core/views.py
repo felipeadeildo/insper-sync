@@ -21,5 +21,4 @@ def dashboard(request):
 
     context = {}
 
-    return render(request, "accounts/dashboard.html", context)
-    return render(request, "accounts/dashboard.html", context)
+    return render(request, "dashboard.html", context)
