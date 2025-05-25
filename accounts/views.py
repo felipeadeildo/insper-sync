@@ -89,7 +89,11 @@ def setup_credentials(request):
 
         if not insper_username or not insper_password:
             messages.error(request, "Todos os campos são obrigatórios.")
-            return render(request, "accounts/setup_credentials.html")
+            return render(
+                request,
+                "accounts/setup_credentials.html",
+                {"insper_username": insper_username},
+            )
 
         # Validar credenciais com o sistema do Insper
         is_valid, user_data, error_message = validate_insper_credentials(
@@ -101,7 +105,11 @@ def setup_credentials(request):
                 request,
                 f"Erro ao validar credenciais: {error_message or 'Credenciais inválidas'}",
             )
-            return render(request, "accounts/setup_credentials.html")
+            return render(
+                request,
+                "accounts/setup_credentials.html",
+                {"insper_username": insper_username},
+            )
 
         try:
             # Criptografar a senha antes de salvar
@@ -128,9 +136,18 @@ def setup_credentials(request):
             messages.error(
                 request, f"Erro ao salvar credenciais: {str(e)}. Tente novamente."
             )
-            return render(request, "accounts/setup_credentials.html")
+            return render(
+                request,
+                "accounts/setup_credentials.html",
+                {"insper_username": insper_username},
+            )
 
-    return render(request, "accounts/setup_credentials.html")
+    # Pass the user's existing insper_username to the template if it exists
+    context = {}
+    if hasattr(request.user, "insper_username") and request.user.insper_username:
+        context["insper_username"] = request.user.insper_username
+
+    return render(request, "accounts/setup_credentials.html", context)
 
 
 @login_required
