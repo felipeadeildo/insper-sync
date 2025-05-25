@@ -20,6 +20,7 @@ services:
       - "${WEB_PORT:-}:8000"
     volumes:
       - .:/app
+      - /tmp/inpser-sync-cache:/app/cache
     env_file:
       - .env
     environment:
@@ -37,6 +38,7 @@ services:
     container_name: insper_sync_celery
     volumes:
       - .:/app
+      - /tmp/inpser-sync-cache:/app/cache
     env_file:
       - .env
     environment:
