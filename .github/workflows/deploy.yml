@@ -1,0 +1,48 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: self-hosted
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          # Django
+          DEBUG=False
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+
+          # Email Configuration
+          EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+          EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+          EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}
+          EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}
+          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}
+
+          WEB_PORT=${{ secrets.WEB_PORT }}
+
+          DOMAIN=${{ secrets.DOMAIN }}
+          EOF
+
+      - name: Deploy services
+        run: |
+          docker compose down --remove-orphans || true
+          docker compose build --no-cache
+          docker compose up -d
+
+      - name: Cleanup
+        run: |
+          docker image prune -f || true
