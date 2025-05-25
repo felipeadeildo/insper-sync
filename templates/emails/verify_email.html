@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Email - Insper Sync</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            background: #3b82f6;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .title {
+            color: #1f2937;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin: 0;
+            font-size: 16px;
+        }
+        .button {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .content {
+            margin: 30px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📅</div>
+            <h1 class="title">Verificação de Email</h1>
+            <p class="subtitle">Confirme seu email para acessar o Insper Sync</p>
+        </div>
+
+        <div class="content">
+            <p>Olá!</p>
+            
+            <p>Você solicitou acesso ao <strong>Insper Sync</strong>, nossa ferramenta para sincronizar calendários do Insper com Google Calendar.</p>
+            
+            <p>Para confirmar seu email e criar sua conta, clique no botão abaixo:</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ verification_url }}" class="button">Verificar Email</a>
+            </div>
+            
+            <p>Ou copie e cole o link abaixo em seu navegador:</p>
+            <p style="word-break: break-all; background: #f3f4f6; padding: 10px; border-radius: 4px; font-family: monospace;">
+                {{ verification_url }}
+            </p>
+            
+            <div class="warning">
+                <strong>⚠️ Importante:</strong> Este link é válido por 24 horas e só pode ser usado uma vez.
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Se você não solicitou este email, pode ignorá-lo com segurança.</p>
+            <p><strong>Insper Sync</strong> - Sincronização de calendários para estudantes do Insper</p>
+        </div>
+    </div>
+</body>
+</html>

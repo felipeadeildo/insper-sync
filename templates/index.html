@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+<!--  -->
+{% block title %}Insper Sync - Sincronize seu calendário do Insper
+automaticamente{% endblock %}
+
+<!--  -->
+{% block content %}
+<!-- Hero Section with Login -->
+<div
+  class="hero min-h-[80vh] bg-gradient-to-br from-primary/10 to-secondary/10"
+>
+  <div class="hero-content flex-col lg:flex-row-reverse gap-12">
+    <!-- Login Card -->
+    <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+      <div class="card-body">
+        <h2 class="card-title text-2xl text-center mb-4">
+          <span class="text-primary">Comece Agora</span>
+        </h2>
+
+        <form method="post" action="{% url 'verify_email' %}">
+          {% csrf_token %}
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Email do Insper</span>
+            </label>
+            <div class="relative">
+              <input
+                type="email"
+                name="email"
+                placeholder="seu.email@al.insper.edu.br"
+                class="input input-bordered input-primary w-full pl-10"
+                required
+                pattern=".*@(al\.)?insper\.edu\.br$"
+                title="Use apenas emails do Insper (@al.insper.edu.br ou @insper.edu.br)"
+              />
+              <i
+                data-lucide="mail"
+                class="w-5 h-5 absolute left-3 top-3 text-primary"
+              ></i>
+            </div>
+            <label class="label">
+              <span class="label-text-alt text-base-content/60">
+                Apenas emails do Insper são aceitos
+              </span>
+            </label>
+          </div>
+
+          <div class="form-control mt-6">
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="send" class="w-5 h-5 mr-2"></i>
+              Enviar Token de Verificação
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="text-center lg:text-left">
+      <div class="text-6xl mb-4">📅</div>
+      <h1 class="text-5xl font-bold text-primary mb-6">Insper Sync</h1>
+      <p class="text-xl mb-8 text-base-content/80 max-w-lg">
+        Sincronize automaticamente seu calendário acadêmico do Insper com o
+        Google Calendar
+      </p>
+
+      <!-- Features List -->
+      <div class="space-y-3 mb-8">
+        <div class="flex items-center gap-3">
+          <i data-lucide="check-circle" class="w-5 h-5 text-success"></i>
+          <span>Sincronização automática</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <i data-lucide="shield-check" class="w-5 h-5 text-success"></i>
+          <span>Credenciais seguras e criptografadas</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-success"></i>
+          <span>Configuração em menos de 5 minutos</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <i data-lucide="heart" class="w-5 h-5 text-success"></i>
+          <span>100% gratuito para estudantes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Como Funciona Section -->
+<section id="sobre" class="py-16 bg-base-100">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center text-primary mb-12">
+      Como Funciona?
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+      <!-- Step 1 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <span class="text-2xl text-primary-content font-bold">1</span>
+        </div>
+        <h3 class="text-lg font-bold mb-2">Verifique seu Email</h3>
+        <p class="text-sm text-base-content/70">
+          Digite seu email do Insper e confirme através do token enviado
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <span class="text-2xl text-secondary-content font-bold">2</span>
+        </div>
+        <h3 class="text-lg font-bold mb-2">Configure Credenciais</h3>
+        <p class="text-sm text-base-content/70">
+          Adicione sua senha do Portal Acadêmico de forma segura
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <span class="text-2xl text-accent-content font-bold">3</span>
+        </div>
+        <h3 class="text-lg font-bold mb-2">Conecte ao Google</h3>
+        <p class="text-sm text-base-content/70">
+          Autorize a sincronização com seu Google Calendar
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16 bg-base-200">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center text-primary mb-12">
+      Perguntas Frequentes
+    </h2>
+
+    <div class="max-w-2xl mx-auto space-y-4">
+      <!-- FAQ 1 -->
+      <div class="collapse collapse-plus bg-base-100">
+        <input type="radio" name="faq-accordion" checked="checked" />
+        <div class="collapse-title text-lg font-medium">
+          É seguro fornecer minha senha do Insper?
+        </div>
+        <div class="collapse-content">
+          <p class="text-base-content/70">
+            Sim! Suas credenciais são criptografadas usando padrões de segurança
+            bancários. Você pode revogar o acesso a qualquer momento.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="collapse collapse-plus bg-base-100">
+        <input type="radio" name="faq-accordion" />
+        <div class="collapse-title text-lg font-medium">
+          Com que frequência os eventos são sincronizados?
+        </div>
+        <div class="collapse-content">
+          <p class="text-base-content/70">
+            A sincronização acontece automaticamente a cada 6 horas, garantindo
+            que seus eventos estejam sempre atualizados.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="collapse collapse-plus bg-base-100">
+        <input type="radio" name="faq-accordion" />
+        <div class="collapse-title text-lg font-medium">
+          Posso cancelar a sincronização?
+        </div>
+        <div class="collapse-content">
+          <p class="text-base-content/70">
+            Claro! Você pode cancelar através do painel de controle e seus dados
+            serão removidos completamente de nossos servidores.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

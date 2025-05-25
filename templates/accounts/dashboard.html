@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Insper Sync{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+  <div class="container mx-auto px-4">
+    <!-- Header -->
+    <div
+      class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8"
+    >
+      <div>
+        <h1 class="text-3xl font-bold flex items-center gap-3">
+          <div
+            class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center"
+          >
+            <i data-lucide="calendar" class="w-6 h-6 text-primary"></i>
+          </div>
+          Dashboard
+        </h1>
+        <p class="text-base-content/70 mt-2">
+          Bem-vindo(a), {{ user.name }}! Gerencie suas sincronizações de
+          calendário.
+        </p>
+      </div>
+
+      <div class="mt-4 lg:mt-0 flex gap-2">
+        <button class="btn btn-primary">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          Sincronizar Agora
+        </button>
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </div>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+          >
+            <li>
+              <a href="{% url 'setup_credentials' %}">
+                <i data-lucide="key" class="w-4 h-4"></i>
+                Configurações
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                onclick="document.getElementById('logout-form').submit();"
+              >
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sair
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="stats bg-base-100 shadow">
+        <div class="stat">
+          <div class="stat-figure text-primary">
+            <i data-lucide="calendar-check" class="w-8 h-8"></i>
+          </div>
+          <div class="stat-title">Calendários Sincronizados</div>
+          <div class="stat-value text-primary">0</div>
+          <div class="stat-desc">Em breve disponível</div>
+        </div>
+      </div>
+
+      <div class="stats bg-base-100 shadow">
+        <div class="stat">
+          <div class="stat-figure text-secondary">
+            <i data-lucide="clock" class="w-8 h-8"></i>
+          </div>
+          <div class="stat-title">Última Sincronização</div>
+          <div class="stat-value text-secondary">--</div>
+          <div class="stat-desc">Nunca sincronizado</div>
+        </div>
+      </div>
+
+      <div class="stats bg-base-100 shadow">
+        <div class="stat">
+          <div class="stat-figure text-accent">
+            <i data-lucide="calendar-plus" class="w-8 h-8"></i>
+          </div>
+          <div class="stat-title">Eventos Importados</div>
+          <div class="stat-value text-accent">0</div>
+          <div class="stat-desc">Aguardando sincronização</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Calendar Setup -->
+      <div class="lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title">
+              <i data-lucide="calendar-days" class="w-5 h-5"></i>
+              Configuração de Calendários
+            </h2>
+
+            <div class="alert alert-info">
+              <i data-lucide="info" class="w-5 h-5"></i>
+              <div>
+                <h3 class="font-bold">Em Desenvolvimento</h3>
+                <div class="text-sm">
+                  A funcionalidade de sincronização com Google Calendar está
+                  sendo desenvolvida. Em breve você poderá conectar sua conta do
+                  Google e sincronizar automaticamente.
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4 mt-6">
+              <div
+                class="flex items-center justify-between p-4 bg-base-200 rounded-lg"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="bg-primary/10 rounded-full w-8 h-8 flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="graduation-cap"
+                      class="w-4 h-4 text-primary"
+                    ></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Calendário Acadêmico Insper</h3>
+                    <p class="text-sm text-base-content/70">
+                      Aulas, provas e eventos acadêmicos
+                    </p>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline" disabled>
+                  <i data-lucide="link" class="w-4 h-4"></i>
+                  Conectar
+                </button>
+              </div>
+
+              <div
+                class="flex items-center justify-between p-4 bg-base-200 rounded-lg"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="bg-secondary/10 rounded-full w-8 h-8 flex items-center justify-center"
+                  >
+                    <i data-lucide="users" class="w-4 h-4 text-secondary"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Eventos Institucionais</h3>
+                    <p class="text-sm text-base-content/70">
+                      Palestras, workshops e atividades
+                    </p>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline" disabled>
+                  <i data-lucide="link" class="w-4 h-4"></i>
+                  Conectar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="space-y-6">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+              Ações Rápidas
+            </h2>
+
+            <div class="space-y-3">
+              <button class="btn btn-outline w-full" disabled>
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Exportar Calendário
+              </button>
+
+              <button class="btn btn-outline w-full" disabled>
+                <i data-lucide="settings" class="w-4 h-4"></i>
+                Configurar Frequência
+              </button>
+
+              <button class="btn btn-outline w-full" disabled>
+                <i data-lucide="bell" class="w-4 h-4"></i>
+                Gerenciar Notificações
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              Conta
+            </h2>
+
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-sm">
+                <i data-lucide="mail" class="w-4 h-4 text-primary"></i>
+                <span class="text-base-content/70">{{ user.email }}</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm">
+                <i data-lucide="shield-check" class="w-4 h-4 text-success"></i>
+                <span class="text-base-content/70">Email verificado</span>
+              </div>
+
+              {% if user.credentials_configured %}
+              <div class="flex items-center gap-2 text-sm">
+                <i data-lucide="key" class="w-4 h-4 text-success"></i>
+                <span class="text-base-content/70"
+                  >Credenciais configuradas</span
+                >
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden logout form -->
+<form
+  id="logout-form"
+  method="post"
+  action="{% url 'admin:logout' %}"
+  style="display: none"
+>
+  {% csrf_token %}
+</form>
+{% endblock %}
