@@ -1,0 +1,53 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: insper_sync_redis
+    ports:
+      - "${REDIS_PORT:-}:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: .
+    container_name: insper_sync_web
+    ports:
+      - "${WEB_PORT:-}:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DEBUG=False
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+
+  celery:
+    build: .
+    container_name: insper_sync_celery
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DEBUG=False
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: celery -A core worker --loglevel=info
+
+volumes:
+  redis_data:
