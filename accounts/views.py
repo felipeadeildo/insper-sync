@@ -121,7 +121,7 @@ def setup_credentials(request):
             request.user.credentials_configured = True
 
             # Atualizar nome do usuário se disponível
-            if user_data and user_data.name and not request.user.name:
+            if user_data:
                 request.user.name = user_data.name
 
             request.user.save()
