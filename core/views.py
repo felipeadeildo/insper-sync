@@ -8,6 +8,11 @@ def home(request):
     return render(request, "index.html")
 
 
+def terms_of_use(request):
+    """Página de termos de uso"""
+    return render(request, "terms_of_use.html")
+
+
 @login_required
 def dashboard(request):
     """Dashboard do usuário"""

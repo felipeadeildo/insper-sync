@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+<!--  -->
+{% block title %}Termos de Uso - Insper Sync{% endblock %}
+
+<!--  -->
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <!-- Header -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-primary mb-4">Termos de Uso</h1>
+    <p class="text-lg text-base-content/70">
+      Última atualização: 25 de maio de 2025
+    </p>
+  </div>
+
+  <!-- Content -->
+  <div class="prose prose-lg max-w-none">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body space-y-8">
+        <!-- Seção 1: Aceitação dos Termos -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            1. Aceitação dos Termos
+          </h2>
+          <p class="text-base-content/80 leading-relaxed">
+            Ao utilizar o Insper Sync, você concorda com estes termos de uso. Se
+            você não concordar com qualquer parte destes termos, não utilize
+            nosso serviço.
+          </p>
+        </section>
+
+        <!-- Seção 2: Descrição do Serviço -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            2. Descrição do Serviço
+          </h2>
+          <p class="text-base-content/80 leading-relaxed mb-4">
+            O Insper Sync é um serviço que permite a sincronização automática do
+            calendário acadêmico do Insper com o Google Calendar dos estudantes.
+          </p>
+          <div class="alert alert-info">
+            <i data-lucide="info" class="w-5 h-5"></i>
+            <span
+              >Este é um projeto acadêmico desenvolvido por estudantes para
+              estudantes do Insper.</span
+            >
+          </div>
+        </section>
+
+        <!-- Seção 3: Elegibilidade -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">3. Elegibilidade</h2>
+          <ul class="list-disc list-inside space-y-2 text-base-content/80">
+            <li>Você deve ser estudante ativo do Insper</li>
+            <li>
+              Você deve possuir um email institucional válido
+              (@al.insper.edu.br)
+            </li>
+            <li>Você deve ter acesso ao Portal Acadêmico do Insper</li>
+            <li>Você deve possuir uma conta do Google válida</li>
+          </ul>
+        </section>
+
+        <!-- Seção 4: Coleta e Uso de Dados -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            4. Coleta e Uso de Dados
+          </h2>
+          <p class="text-base-content/80 leading-relaxed mb-4">
+            Para fornecer nosso serviço, coletamos e armazenamos as seguintes
+            informações:
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="card bg-primary/10 border border-primary/20">
+              <div class="card-body p-4">
+                <h3 class="font-semibold text-primary mb-2">
+                  📧 Email Institucional
+                </h3>
+                <p class="text-sm text-base-content/70">
+                  Usado para identificação e verificação da elegibilidade como
+                  estudante do Insper.
+                </p>
+              </div>
+            </div>
+
+            <div class="card bg-secondary/10 border border-secondary/20">
+              <div class="card-body p-4">
+                <h3 class="font-semibold text-secondary mb-2">
+                  👤 Nome de Usuário
+                </h3>
+                <p class="text-sm text-base-content/70">
+                  Extraído do Portal Acadêmico para personalização da
+                  experiência.
+                </p>
+              </div>
+            </div>
+
+            <div class="card bg-accent/10 border border-accent/20">
+              <div class="card-body p-4">
+                <h3 class="font-semibold text-accent mb-2">🔐 Credenciais</h3>
+                <p class="text-sm text-base-content/70">
+                  Senha do Portal Acadêmico criptografada com a chave pública do
+                  Insper.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-success">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <div>
+              <h4 class="font-semibold">Segurança Garantida</h4>
+              <p class="text-sm">
+                Suas credenciais são criptografadas usando a chave pública
+                oficial do Insper, garantindo máxima segurança.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seção 5: Responsabilidades do Usuário -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            5. Responsabilidades do Usuário
+          </h2>
+          <ul class="list-disc list-inside space-y-2 text-base-content/80">
+            <li>Manter suas credenciais de acesso seguras e atualizadas</li>
+            <li>Usar o serviço apenas para fins acadêmicos legítimos</li>
+            <li>
+              Não tentar comprometer a segurança ou funcionalidade do sistema
+            </li>
+            <li>Reportar qualquer problema ou comportamento suspeito</li>
+            <li>
+              Respeitar os termos de uso do Google Calendar e do Portal
+              Acadêmico do Insper
+            </li>
+          </ul>
+        </section>
+
+        <!-- Seção 6: Limitações do Serviço -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            6. Limitações do Serviço
+          </h2>
+          <div class="alert alert-warning">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <div>
+              <h4 class="font-semibold">Importante</h4>
+              <p class="text-sm">
+                O serviço é fornecido "como está" sem garantias de
+                disponibilidade contínua ou precisão absoluta dos dados.
+              </p>
+            </div>
+          </div>
+          <ul class="list-disc list-inside space-y-2 text-base-content/80 mt-4">
+            <li>Não garantimos 100% de uptime do serviço</li>
+            <li>Podem ocorrer atrasos na sincronização dos eventos</li>
+            <li>
+              O serviço depende da disponibilidade do Portal Acadêmico do Insper
+            </li>
+            <li>
+              Mudanças no sistema do Insper podem afetar temporariamente o
+              funcionamento
+            </li>
+          </ul>
+        </section>
+
+        <!-- Seção 7: Propriedade Intelectual -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            7. Propriedade Intelectual
+          </h2>
+          <p class="text-base-content/80 leading-relaxed">
+            O código-fonte do Insper Sync é distribuído sob licença open source.
+            Os dados acadêmicos permanecem propriedade do Insper. O usuário
+            mantém os direitos sobre seus dados pessoais e eventos do Google
+            Calendar.
+          </p>
+        </section>
+
+        <!-- Seção 8: Modificações -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            8. Modificações dos Termos
+          </h2>
+          <p class="text-base-content/80 leading-relaxed">
+            Reservamos o direito de modificar estes termos a qualquer momento.
+            Usuários serão notificados sobre mudanças significativas por email.
+            O uso continuado do serviço após as modificações constitui aceitação
+            dos novos termos.
+          </p>
+        </section>
+
+        <!-- Seção 9: Cancelamento -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">
+            9. Cancelamento do Serviço
+          </h2>
+          <p class="text-base-content/80 leading-relaxed mb-4">
+            Você pode cancelar sua conta a qualquer momento através do
+            dashboard. Ao cancelar:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-base-content/80">
+            <li>Todos os seus dados serão removidos permanentemente</li>
+            <li>A sincronização com o Google Calendar será interrompida</li>
+            <li>
+              Os eventos já sincronizados permanecerão no seu Google Calendar
+            </li>
+          </ul>
+        </section>
+
+        <!-- Seção 10: Contato -->
+        <section>
+          <h2 class="text-2xl font-bold text-primary mb-4">10. Contato</h2>
+          <p class="text-base-content/80 leading-relaxed">
+            Para dúvidas sobre estes termos ou sobre o funcionamento do serviço,
+            entre em contato conosco através do GitHub ou pelo email do
+            desenvolvedor.
+          </p>
+        </section>
+
+        <!-- Data da última atualização -->
+        <div class="divider"></div>
+        <div class="text-center">
+          <p class="text-sm text-base-content/50">
+            Este documento foi atualizado pela última vez em 25 de maio de 2025.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão para voltar -->
+  <div class="text-center mt-8">
+    <a href="/" class="btn btn-primary">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      Voltar ao Início
+    </a>
+  </div>
+</div>
+{% endblock %}

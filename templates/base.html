@@ -47,7 +47,7 @@
           {% if request.resolver_match.url_name == 'home' or not user.is_authenticated %}
             <li><a href="/" class="hover:text-primary">Início</a></li>
             <li><a href="#sobre" class="hover:text-primary">Como Funciona</a></li>
-            <li><a href="#contato" class="hover:text-primary">Suporte</a></li>
+            <li><a href="{% url 'terms' %}" class="hover:text-primary">Termos de Uso</a></li>
           {% endif %}
         </ul>
       </div>
@@ -113,7 +113,7 @@
             {% if request.resolver_match.url_name == 'home' or not user.is_authenticated %}
               <li><a href="/">Início</a></li>
               <li><a href="#sobre">Como Funciona</a></li>
-              <li><a href="#contato">Suporte</a></li>
+              <li><a href="{% url 'terms' %}">Termos de Uso</a></li>
               {% if user.is_authenticated %}
                 <li><hr class="my-1"></li>
               {% endif %}
@@ -163,8 +163,7 @@
       <nav class="grid grid-flow-col gap-4">
         <a href="#sobre" class="link link-hover">Como Funciona</a>
         <a href="#privacidade" class="link link-hover">Privacidade</a>
-        <a href="#termos" class="link link-hover">Termos de Uso</a>
-        <a href="#contato" class="link link-hover">Suporte</a>
+        <a href="{% url 'terms' %}" class="link link-hover">Termos de Uso</a>
       </nav>
       <nav>
         <div class="grid grid-flow-col gap-4">

@@ -201,10 +201,18 @@ automaticamente{% endblock %}
           É seguro fornecer minha senha do Insper?
         </div>
         <div class="collapse-content">
-          <p class="text-base-content/70">
-            Sim! Suas credenciais são criptografadas usando padrões de segurança
-            bancários. Você pode revogar o acesso a qualquer momento.
+          <p class="text-base-content/70 mb-4">
+            Sim, suas credenciais são totalmente seguras. Armazenamos apenas três informações essenciais:
           </p>
+          <ul class="list-disc list-inside text-base-content/70 space-y-2">
+            <li><strong>Email institucional:</strong> usado para verificação e identificação</li>
+            <li><strong>Nome de usuário:</strong> extraído do Portal Acadêmico para personalização</li>
+            <li><strong>Senha criptografada:</strong> protegida com a chave pública oficial do Insper</li>
+          </ul>
+          <div class="alert alert-info mt-4">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            <span class="text-sm">A criptografia com chave pública garante que nem nossa equipe consegue acessar sua senha real.</span>
+          </div>
         </div>
       </div>
 
@@ -233,6 +241,100 @@ automaticamente{% endblock %}
             Claro! Você pode cancelar através do painel de controle e seus dados
             serão removidos completamente de nossos servidores.
           </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Privacidade Section -->
+<section id="privacidade" class="py-16 bg-base-100">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center text-primary mb-12">
+      Sua Privacidade em Primeiro Lugar
+    </h2>
+
+    <div class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Dados Coletados -->
+        <div class="card bg-primary/5 border border-primary/20">
+          <div class="card-body">
+            <h3 class="card-title text-primary mb-4">
+              <i data-lucide="database" class="w-5 h-5"></i>
+              Dados Armazenados
+            </h3>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center gap-2">
+                <i data-lucide="mail" class="w-4 h-4 text-primary"></i>
+                Email institucional
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="user" class="w-4 h-4 text-primary"></i>
+                Nome de usuário
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="key" class="w-4 h-4 text-primary"></i>
+                Senha criptografada
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Segurança -->
+        <div class="card bg-success/5 border border-success/20">
+          <div class="card-body">
+            <h3 class="card-title text-success mb-4">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+              Proteção de Dados
+            </h3>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center gap-2">
+                <i data-lucide="lock" class="w-4 h-4 text-success"></i>
+                Criptografia RSA
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="server" class="w-4 h-4 text-success"></i>
+                Servidores seguros
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="eye-off" class="w-4 h-4 text-success"></i>
+                Acesso zero à senha
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Controle -->
+        <div class="card bg-accent/5 border border-accent/20">
+          <div class="card-body">
+            <h3 class="card-title text-accent mb-4">
+              <i data-lucide="settings" class="w-5 h-5"></i>
+              Seu Controle
+            </h3>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4 text-accent"></i>
+                Deletar conta
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="pause" class="w-4 h-4 text-accent"></i>
+                Pausar sincronização
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4 text-accent"></i>
+                Exportar dados
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <div class="alert alert-info inline-flex">
+          <i data-lucide="info" class="w-5 h-5"></i>
+          <span>
+            Não compartilhamos seus dados com terceiros. Seu calendário permanece privado e sob seu controle.
+          </span>
         </div>
       </div>
     </div>
