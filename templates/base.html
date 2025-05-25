@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -131,6 +131,54 @@
     <script>
       // Initialize Lucide icons
       lucide.createIcons()
+
+      // Theme persistence management
+      const themeController = document.querySelector('.theme-controller')
+      const htmlElement = document.documentElement
+
+      // Function to apply theme
+      function applyTheme(theme) {
+        htmlElement.setAttribute('data-theme', theme)
+        if (themeController) {
+          themeController.checked = theme === 'dark'
+        }
+      }
+
+      // Load saved theme on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('insper-sync-theme')
+
+        if (savedTheme) {
+          // Use saved theme
+          applyTheme(savedTheme)
+        } else {
+          // Check system preference
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const defaultTheme = prefersDark ? 'dark' : 'light'
+          applyTheme(defaultTheme)
+          localStorage.setItem('insper-sync-theme', defaultTheme)
+        }
+      })
+
+      // Listen for theme changes
+      if (themeController) {
+        themeController.addEventListener('change', function() {
+          const newTheme = this.checked ? 'dark' : 'light'
+          applyTheme(newTheme)
+          localStorage.setItem('insper-sync-theme', newTheme)
+        })
+      }
+
+      // Listen for system theme changes
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        // Only auto-switch if user hasn't manually set a preference
+        const savedTheme = localStorage.getItem('insper-sync-theme')
+        if (!savedTheme) {
+          const systemTheme = e.matches ? 'dark' : 'light'
+          applyTheme(systemTheme)
+          localStorage.setItem('insper-sync-theme', systemTheme)
+        }
+      })
 
       // Smooth scrolling for anchor links
       document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
