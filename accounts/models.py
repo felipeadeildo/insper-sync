@@ -49,6 +49,23 @@ class User(AbstractUser):
         max_length=255, blank=True, help_text="Senha criptografada do Portal Acadêmico"
     )
 
+    # Google Calendar integration fields
+    google_access_token = models.TextField(
+        blank=True, help_text="Token de acesso do Google Calendar"
+    )
+    google_refresh_token = models.TextField(
+        blank=True, help_text="Token de refresh do Google Calendar"
+    )
+    google_token_expires_at = models.DateTimeField(
+        null=True, blank=True, help_text="Data de expiração do token do Google"
+    )
+    google_calendar_id = models.CharField(
+        max_length=255, blank=True, help_text="ID do calendário principal do Google"
+    )
+    google_connected = models.BooleanField(
+        default=False, help_text="Indica se a conta Google está conectada"
+    )
+
     email_verified = models.BooleanField(default=False)
     credentials_configured = models.BooleanField(default=False)
     sync_enabled = models.BooleanField(default=False)
@@ -67,12 +84,80 @@ class User(AbstractUser):
         return self.email.endswith(("@al.insper.edu.br", "@insper.edu.br"))
 
     def can_sync(self) -> bool:
-        """Verifica se o usuário pode sincronizar (email verificado e credenciais configuradas)"""
-        return self.email_verified and self.credentials_configured and self.is_active
+        """Verifica se o usuário pode sincronizar (email verificado, credenciais configuradas e Google conectado)"""
+        return (
+            self.email_verified
+            and self.credentials_configured
+            and self.google_connected
+            and self.is_active
+        )
 
     def has_insper_credentials(self) -> bool:
         """Verifica se o usuário tem credenciais do Insper configuradas"""
         return bool(self.insper_username and self.insper_password)
+
+    def has_google_credentials(self) -> bool:
+        """Verifica se o usuário tem credenciais do Google configuradas"""
+        return bool(self.google_access_token and self.google_refresh_token)
+
+    def is_google_token_expired(self) -> bool:
+        """Verifica se o token do Google expirou"""
+        if not self.google_token_expires_at:
+            return True
+        return (
+            datetime.datetime.now(datetime.timezone.utc) >= self.google_token_expires_at
+        )
+
+    def update_google_credentials(
+        self,
+        access_token: str,
+        refresh_token: str,
+        expires_in: int,
+        calendar_id: str = "",
+    ):
+        """
+        Atualiza as credenciais do Google do usuário.
+
+        Args:
+            access_token: Token de acesso do Google
+            refresh_token: Token de refresh do Google
+            expires_in: Tempo em segundos até a expiração do token
+            calendar_id: ID do calendário principal (opcional)
+        """
+        self.google_access_token = access_token
+        self.google_refresh_token = refresh_token
+        self.google_token_expires_at = datetime.datetime.now(
+            datetime.timezone.utc
+        ) + datetime.timedelta(seconds=expires_in)
+        if calendar_id:
+            self.google_calendar_id = calendar_id
+        self.google_connected = True
+        self.save(
+            update_fields=[
+                "google_access_token",
+                "google_refresh_token",
+                "google_token_expires_at",
+                "google_calendar_id",
+                "google_connected",
+            ]
+        )
+
+    def disconnect_google(self):
+        """Desconecta a conta do Google"""
+        self.google_access_token = ""
+        self.google_refresh_token = ""
+        self.google_token_expires_at = None
+        self.google_calendar_id = ""
+        self.google_connected = False
+        self.save(
+            update_fields=[
+                "google_access_token",
+                "google_refresh_token",
+                "google_token_expires_at",
+                "google_calendar_id",
+                "google_connected",
+            ]
+        )
 
     def update_insper_credentials(self, username: str, encrypted_password: str):
         """
