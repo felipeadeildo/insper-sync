@@ -77,6 +77,9 @@ jobs:
           WEB_PORT=${{ secrets.WEB_PORT }}
 
           DOMAIN=${{ secrets.DOMAIN }}
+
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           EOF
 
       - name: Deploy services
