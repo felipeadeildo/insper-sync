@@ -26,4 +26,5 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("terms/", views.terms_of_use, name="terms"),
     path("accounts/", include("accounts.urls")),
+    path("sync/", include("sync.urls")),
 ]
