@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 
 from core.settings import DOMAIN
+from core.utils import InsperAuth
 
 from .models import EmailVerificationToken, User
 
@@ -46,3 +47,49 @@ def send_verification_email(user_id):
     )
 
     return f"Email de verificação enviado com sucesso para {user.email}"
+
+
+@shared_task
+def update_user_insper_academic_data(user_id):
+    """
+    Task para atualizar dados do Insper do usuário de forma assíncrona
+    """
+
+    try:
+        user = User.objects.get(id=user_id)
+
+        # Verifica se o usuário tem credenciais do Insper configuradas
+        if not user.has_insper_credentials():
+            return f"Usuário {user.email} não possui credenciais do Insper configuradas"
+
+        if not user.insper_portal_id:
+            return f"Usuário {user.email} não possui portal_id configurado"
+
+        with InsperAuth() as auth:
+            success = auth.login(
+                user.insper_username, user.insper_enc_password, encrypt=False
+            )
+            if not success:
+                return f"Erro ao logar no Insper para {user.email}"
+
+            academic_data = auth.get_user_academic_data()
+
+        if academic_data is None:
+            return f"Erro ao buscar dados acadêmicos do Insper para {user.email}"
+
+        # Atualiza os dados do usuário com as informações do portal
+        updated_fields = ["name", "insper_matricula", "insper_turma", "insper_curso"]
+
+        user.name = academic_data.nomeAluno
+        user.insper_matricula = academic_data.matricula
+        user.insper_turma = academic_data.turma
+        user.insper_curso = academic_data.nomeCurso
+
+        user.save(update_fields=updated_fields)
+
+        return f"Dados do Insper atualizados com sucesso para {user.email}. Campos atualizados: {', '.join(updated_fields)}"
+
+    except User.DoesNotExist:
+        return f"Usuário com ID {user_id} não encontrado"
+    except Exception as e:
+        return f"Erro inesperado ao atualizar dados do Insper para usuário {user_id}: {str(e)}"
