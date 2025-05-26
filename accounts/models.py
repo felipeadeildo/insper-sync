@@ -45,8 +45,20 @@ class User(AbstractUser):
     insper_username = models.CharField(
         max_length=100, blank=True, help_text="Username do Portal Acadêmico do Insper"
     )
-    insper_password = models.CharField(
+    insper_enc_password = models.CharField(
         max_length=255, blank=True, help_text="Senha criptografada do Portal Acadêmico"
+    )
+    insper_portal_id = models.CharField(
+        max_length=255, blank=True, help_text="ID do Portal Acadêmico"
+    )
+    insper_matricula = models.CharField(
+        max_length=255, blank=True, help_text="Matricula do Portal Acadêmico"
+    )
+    insper_turma = models.CharField(
+        max_length=255, blank=True, help_text="Turma do Portal Acadêmico"
+    )
+    insper_curso = models.CharField(
+        max_length=255, blank=True, help_text="Curso do Portal Acadêmico"
     )
 
     # Google Calendar integration fields
@@ -94,7 +106,7 @@ class User(AbstractUser):
 
     def has_insper_credentials(self) -> bool:
         """Verifica se o usuário tem credenciais do Insper configuradas"""
-        return bool(self.insper_username and self.insper_password)
+        return bool(self.insper_username and self.insper_enc_password)
 
     def has_google_credentials(self) -> bool:
         """Verifica se o usuário tem credenciais do Google configuradas"""
@@ -159,21 +171,26 @@ class User(AbstractUser):
             ]
         )
 
-    def update_insper_credentials(self, username: str, encrypted_password: str):
+    def update_insper_credentials(
+        self, username: str, encrypted_password: str, portal_id: str
+    ):
         """
         Atualiza as credenciais do Insper do usuário.
 
         Args:
             username: Nome de usuário do Insper
             encrypted_password: Senha já criptografada
+            portal_id: ID do Portal Acadêmico
         """
         self.insper_username = username
-        self.insper_password = encrypted_password
+        self.insper_enc_password = encrypted_password
+        self.insper_portal_id = portal_id
         self.credentials_configured = True
         self.save(
             update_fields=[
                 "insper_username",
-                "insper_password",
+                "insper_enc_password",
+                "insper_portal_id",
                 "credentials_configured",
             ]
         )
