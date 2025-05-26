@@ -175,6 +175,237 @@ class GoogleCalendarClient:
         except Exception as e:
             return False, None, f"Erro ao obter calendário principal: {str(e)}"
 
+    def create_calendar(
+        self, summary: str, description: str = "", timezone: str = "America/Sao_Paulo"
+    ) -> Tuple[bool, Optional[GoogleCalendarInfo], Optional[str]]:
+        """
+        Cria um novo calendário no Google Calendar
+
+        Args:
+            summary: Nome do calendário
+            description: Descrição do calendário
+            timezone: Fuso horário do calendário
+
+        Returns:
+            Tupla (sucesso, dados_do_calendário, mensagem_de_erro)
+        """
+        if not self.access_token:
+            return False, None, "Token de acesso não fornecido"
+
+        try:
+            calendar_data = {
+                "summary": summary,
+                "description": description,
+                "timeZone": timezone,
+            }
+
+            response = self.client.post(
+                f"{self.BASE_URL}/calendars",
+                headers={
+                    "Authorization": f"Bearer {self.access_token}",
+                    "Content-Type": "application/json",
+                },
+                json=calendar_data,
+            )
+
+            if response.status_code == 200:
+                return True, response.json(), None
+            else:
+                return False, None, f"Erro HTTP {response.status_code}: {response.text}"
+
+        except Exception as e:
+            return False, None, f"Erro ao criar calendário: {str(e)}"
+
+    def find_calendar_by_name(
+        self, calendar_name: str
+    ) -> Tuple[bool, Optional[GoogleCalendarInfo], Optional[str]]:
+        """
+        Busca um calendário pelo nome
+
+        Args:
+            calendar_name: Nome do calendário a buscar
+
+        Returns:
+            Tupla (sucesso, dados_do_calendário, mensagem_de_erro)
+        """
+        success, calendars, error = self.get_calendar_list()
+
+        if not success or not calendars:
+            return False, None, error or "Erro ao listar calendários"
+
+        for calendar in calendars:
+            if (
+                calendar.get("summary", "").strip().lower()
+                == calendar_name.strip().lower()
+            ):
+                return True, calendar, None
+
+        return False, None, f"Calendário '{calendar_name}' não encontrado"
+
+    def get_or_create_insper_calendar(
+        self, calendar_name: str = "Insper Sync"
+    ) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Obtém ou cria o calendário do Insper Sync
+
+        Args:
+            calendar_name: Nome do calendário (padrão: "Insper Sync")
+
+        Returns:
+            Tupla (sucesso, calendar_id, mensagem_de_erro)
+        """
+        # Primeiro tenta encontrar o calendário existente
+        success, calendar_data, error = self.find_calendar_by_name(calendar_name)
+
+        if success and calendar_data:
+            return True, calendar_data["id"], None
+
+        # Se não encontrou, cria um novo
+        success, calendar_data, error = self.create_calendar(
+            summary=calendar_name,
+            description="Calendário sincronizado automaticamente com o sistema acadêmico do Insper",
+            timezone="America/Sao_Paulo",
+        )
+
+        if success and calendar_data:
+            return True, calendar_data["id"], None
+        else:
+            return False, None, error or "Erro ao criar calendário do Insper Sync"
+
+    def batch_create_events(
+        self, calendar_id: str, events_data: List[GoogleCalendarEvent]
+    ) -> Tuple[bool, List[GoogleCalendarEvent], List[str]]:
+        """
+        Cria múltiplos eventos em lote (mais eficiente que criar um por um)
+
+        Args:
+            calendar_id: ID do calendário
+            events_data: Lista de dados dos eventos
+
+        Returns:
+            Tupla (sucesso_geral, eventos_criados, lista_de_erros)
+        """
+        if not self.access_token:
+            return False, [], ["Token de acesso não fornecido"]
+
+        created_events = []
+        errors = []
+
+        for event_data in events_data:
+            success, event, error = self.create_event(calendar_id, event_data)
+            if success and event:
+                created_events.append(event)
+            else:
+                errors.append(error or "Erro desconhecido")
+
+        # Considera sucesso se pelo menos 80% dos eventos foram criados
+        success_rate = len(created_events) / len(events_data) if events_data else 0
+        overall_success = success_rate >= 0.8
+
+        return overall_success, created_events, errors
+
+    def clear_calendar_events(
+        self,
+        calendar_id: str,
+        time_min: Optional[datetime.datetime] = None,
+        time_max: Optional[datetime.datetime] = None,
+        query: str = "source:insper",
+    ) -> Tuple[bool, int, Optional[str]]:
+        """
+        Remove eventos de um calendário (com filtros opcionais)
+
+        Args:
+            calendar_id: ID do calendário
+            time_min: Data/hora mínima (opcional)
+            time_max: Data/hora máxima (opcional)
+            query: Query de busca para filtrar eventos
+
+        Returns:
+            Tupla (sucesso, quantidade_removida, mensagem_de_erro)
+        """
+        if not self.access_token:
+            return False, 0, "Token de acesso não fornecido"
+
+        try:
+            # Primeiro lista os eventos
+            success, events, error = self.list_events(
+                calendar_id=calendar_id,
+                time_min=time_min,
+                time_max=time_max,
+                max_results=2500,  # Máximo permitido pela API
+            )
+
+            if not success or not events:
+                return False, 0, error or "Erro ao listar eventos"
+
+            # Filtra eventos que contêm a query (ex: eventos do Insper)
+            filtered_events = []
+            if query:
+                for event in events:
+                    # Verifica se o evento foi criado pelo Insper Sync
+                    extended_props = event.get("extendedProperties", {}).get(
+                        "private", {}
+                    )
+                    if (
+                        extended_props.get("sync_source") == "insper"
+                        or query.lower() in event.get("summary", "").lower()
+                    ):
+                        filtered_events.append(event)
+            else:
+                filtered_events = events
+
+            # Remove os eventos filtrados
+            removed_count = 0
+            for event in filtered_events:
+                success, error = self.delete_event(calendar_id, event["id"])
+                if success:
+                    removed_count += 1
+
+            return True, removed_count, None
+
+        except Exception as e:
+            return False, 0, f"Erro ao limpar eventos: {str(e)}"
+
+    def update_calendar_access_control(
+        self, calendar_id: str, make_public: bool = False
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Atualiza controle de acesso do calendário
+
+        Args:
+            calendar_id: ID do calendário
+            make_public: Se deve tornar o calendário público para leitura
+
+        Returns:
+            Tupla (sucesso, mensagem_de_erro)
+        """
+        if not self.access_token:
+            return False, "Token de acesso não fornecido"
+
+        try:
+            if make_public:
+                # Adiciona regra para tornar público para leitura
+                acl_rule = {"role": "reader", "scope": {"type": "default"}}
+
+                response = self.client.post(
+                    f"{self.BASE_URL}/calendars/{calendar_id}/acl",
+                    headers={
+                        "Authorization": f"Bearer {self.access_token}",
+                        "Content-Type": "application/json",
+                    },
+                    json=acl_rule,
+                )
+
+                if response.status_code == 200:
+                    return True, None
+                else:
+                    return False, f"Erro HTTP {response.status_code}: {response.text}"
+
+            return True, None
+
+        except Exception as e:
+            return False, f"Erro ao atualizar controle de acesso: {str(e)}"
+
     def create_event(
         self, calendar_id: str, event_data: GoogleCalendarEvent
     ) -> Tuple[bool, Optional[GoogleCalendarEvent], Optional[str]]:
@@ -304,9 +535,9 @@ class GoogleCalendarClient:
             }
 
             if time_min:
-                params["timeMin"] = time_min.isoformat()
+                params["timeMin"] = time_min.astimezone().isoformat()
             if time_max:
-                params["timeMax"] = time_max.isoformat()
+                params["timeMax"] = time_max.astimezone().isoformat()
 
             response = self.client.get(
                 f"{self.BASE_URL}/calendars/{calendar_id}/events",
