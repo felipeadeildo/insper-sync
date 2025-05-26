@@ -22,6 +22,39 @@ class InsperUserData:
     theme: str
 
 
+@dataclass
+class InsperAcademicData:
+    """Dados acadêmicos do usuário do Insper retornados após consulta"""
+
+    id: str
+    matricula: str
+    codAluno: str
+    situacaoAluno: str
+    nomeAluno: str
+    codCurso: str
+    nomeCurso: str
+    sexo: str
+    turma: str
+    serie: str
+    ano: str
+    semestre: str
+    descrSemestre: str
+    # user: dict
+    # usuarioLogado: dict
+    # foto: Optional[str]
+    # links: list
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        """
+        Cria uma instância da classe a partir de um dicionário,
+        ignorando campos extras que não estão definidos na classe.
+        """
+        # Filtra apenas as chaves que existem como campos na classe
+        valid_fields = {k: v for k, v in data.items() if k in cls.__annotations__}
+        return cls(**valid_fields)
+
+
 class InsperCrypto:
     """Utilitários para criptografia com o sistema do Insper"""
 
@@ -92,6 +125,8 @@ class InsperCrypto:
 class InsperAuth:
     """Utilitários para autenticação com o sistema do Insper"""
 
+    user_data: InsperUserData
+
     def __init__(self):
         self.session = httpx.Client(base_url="https://sga.insper.edu.br")
         # Define cookies iniciais
@@ -111,10 +146,72 @@ class InsperAuth:
             user_data_str = user_data_bytes.decode("utf-8")
             user_data_dict = json.loads(user_data_str)
 
-            return InsperUserData(**user_data_dict)
+            self.user_data = InsperUserData(**user_data_dict)
+            return self.user_data
 
         except Exception as e:
             raise Exception(f"Erro ao processar dados do usuário: {str(e)}")
+
+    def login(self, username: str, password: str, encrypt: bool = True) -> bool:
+        """
+        Autentica o usuário no sistema do Insper para manter a sessão ativa.
+
+        Args:
+            username: Nome de usuário do Insper
+            password: Senha em texto plano
+            encrypt: Se a senha deve ser criptografada
+
+        Returns:
+            True se a autenticação foi bem-sucedida, False caso contrário
+        """
+        try:
+            encrypted_password = (
+                InsperCrypto.encrypt_password(password) if encrypt else password
+            )
+
+            response = self.session.post(
+                "/AOnline/auth",
+                data={"username": username, "password": encrypted_password},
+                headers={"content-type": "application/x-www-form-urlencoded"},
+            )
+
+            try:
+                self._parse_user_data(response)
+            except Exception:
+                pass
+
+            return response.status_code == 200 and "user-data" in response.cookies
+
+        except Exception:
+            return False
+
+    def get_user_academic_data(self) -> Optional[InsperAcademicData]:
+        """
+        Busca os dados acadêmicos do usuário no portal do Insper.
+
+        Returns:
+            Dados acadêmicos do usuário ou None se não encontrados
+
+        Raises:
+            Exception: Em caso de erro na requisição
+        """
+        portal_id = self.user_data.id
+        try:
+            response = self.session.get(
+                f"/AOnline/apix/api/rest/alunos/user/{portal_id}", timeout=30
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+
+                # Verifica se há conteúdo na resposta
+                if data.get("content") and len(data["content"]) > 0:
+                    return InsperAcademicData.from_dict(data["content"][0])
+
+            return None
+
+        except Exception as e:
+            raise Exception(f"Erro ao buscar dados acadêmicos: {str(e)}")
 
     def validate_credentials(
         self, username: str, password: str
