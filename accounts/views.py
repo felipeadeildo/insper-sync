@@ -3,7 +3,9 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.crypto import get_random_string
 
+from core.google_calendar import GoogleCalendarClient, get_or_refresh_access_token
 from core.utils import encrypt_insper_password, validate_insper_credentials
 
 from .models import EmailVerificationToken, User
@@ -154,3 +156,127 @@ def setup_credentials(request):
 def logout_view(request):
     logout(request)
     return redirect("home")
+
+
+@login_required
+def google_auth(request):
+    """Inicia o processo de autenticação OAuth com Google"""
+    if not request.user.email_verified:
+        messages.error(request, "Você precisa verificar seu email primeiro.")
+        return redirect("home")
+
+    if not request.user.credentials_configured:
+        messages.error(request, "Configure suas credenciais do Insper primeiro.")
+        return redirect("setup_credentials")
+
+    # Gerar estado CSRF para validação
+    state = get_random_string(32)
+    request.session["google_oauth_state"] = state
+
+    # Criar cliente e obter URL de autorização
+    client = GoogleCalendarClient()
+    auth_url = client.get_authorization_url(state=state)
+
+    return redirect(auth_url)
+
+
+@login_required
+def google_callback(request):
+    """Callback do OAuth do Google"""
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+    error = request.GET.get("error")
+
+    # Verificar se houve erro na autorização
+    if error:
+        messages.error(request, f"Erro na autorização: {error}")
+        return redirect("dashboard")
+
+    # Verificar estado CSRF
+    if not state or state != request.session.get("google_oauth_state"):
+        messages.error(request, "Estado de autorização inválido.")
+        return redirect("dashboard")
+
+    # Limpar estado da sessão
+    request.session.pop("google_oauth_state", None)
+
+    if not code:
+        messages.error(request, "Código de autorização não fornecido.")
+        return redirect("dashboard")
+
+    # Trocar código por tokens
+    client = GoogleCalendarClient()
+    success, token_data, error_msg = client.exchange_code_for_tokens(code)
+
+    if not success or not token_data:
+        messages.error(request, f"Erro ao obter tokens: {error_msg}")
+        return redirect("dashboard")
+
+    try:
+        # Obter informações do calendário principal
+        client.access_token = token_data["access_token"]
+        calendar_success, calendar_data, calendar_error = client.get_primary_calendar()
+
+        calendar_id = "primary"
+        if calendar_success and calendar_data:
+            calendar_id = calendar_data.get("id", "primary")
+
+        # Salvar credenciais do Google
+        request.user.update_google_credentials(
+            access_token=token_data["access_token"],
+            refresh_token=token_data["refresh_token"],
+            expires_in=token_data.get("expires_in", 3600),
+            calendar_id=calendar_id,
+        )
+
+        messages.success(
+            request,
+            "Google Calendar conectado com sucesso! Agora você pode sincronizar seus eventos.",
+        )
+
+    except Exception as e:
+        messages.error(request, f"Erro ao salvar credenciais do Google: {str(e)}")
+
+    return redirect("dashboard")
+
+
+@login_required
+def google_disconnect(request):
+    """Desconecta a conta do Google"""
+    if request.method == "POST":
+        try:
+            request.user.disconnect_google()
+            messages.success(request, "Conta do Google desconectada com sucesso.")
+        except Exception as e:
+            messages.error(request, f"Erro ao desconectar conta do Google: {str(e)}")
+
+    return redirect("dashboard")
+
+
+@login_required
+def test_google_connection(request):
+    """Testa a conexão com Google Calendar"""
+    if not request.user.google_connected:
+        messages.error(request, "Conta do Google não está conectada.")
+        return redirect("dashboard")
+
+    # Obter token válido
+    success, access_token, error_msg = get_or_refresh_access_token(request.user)
+
+    if not success or not access_token:
+        messages.error(request, f"Erro ao obter token de acesso: {error_msg}")
+        return redirect("dashboard")
+
+    # Testar listagem de calendários
+    client = GoogleCalendarClient(access_token)
+    success, calendars, error_msg = client.get_calendar_list()
+
+    if success and calendars is not None:
+        messages.success(
+            request,
+            f"Conexão testada com sucesso! Encontrados {len(calendars)} calendários.",
+        )
+    else:
+        messages.error(request, f"Erro ao testar conexão: {error_msg}")
+
+    return redirect("dashboard")
