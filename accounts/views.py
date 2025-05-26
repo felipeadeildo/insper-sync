@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.crypto import get_random_string
 
 from core.google_calendar import GoogleCalendarClient, get_or_refresh_access_token
-from core.utils import encrypt_insper_password, validate_insper_credentials
+from core.insper import encrypt_insper_password, validate_insper_credentials
 
 from .models import EmailVerificationToken, User
 from .tasks import send_verification_email, update_user_insper_academic_data

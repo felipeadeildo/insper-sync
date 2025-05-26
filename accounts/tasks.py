@@ -4,8 +4,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.urls import reverse
 
+from core.insper import InsperAuth
 from core.settings import DOMAIN
-from core.utils import InsperAuth
 
 from .models import EmailVerificationToken, User
 
