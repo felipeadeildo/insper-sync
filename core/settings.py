@@ -188,3 +188,16 @@ DEFAULT_FROM_EMAIL = os.getenv(
 CELERY_TIMEZONE = "America/Sao_Paulo"
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
+# Google Calendar API Configuration
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = (
+    f"http{'' if 'localhost' in DOMAIN else 's'}://{DOMAIN}/accounts/google-callback/"
+)
+
+# Google Calendar API Scopes
+GOOGLE_CALENDAR_SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/calendar.events",
+]
