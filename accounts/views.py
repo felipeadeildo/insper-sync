@@ -9,7 +9,7 @@ from core.google_calendar import GoogleCalendarClient, get_or_refresh_access_tok
 from core.utils import encrypt_insper_password, validate_insper_credentials
 
 from .models import EmailVerificationToken, User
-from .tasks import send_verification_email
+from .tasks import send_verification_email, update_user_insper_academic_data
 
 
 def verify_email(request):
@@ -102,7 +102,7 @@ def setup_credentials(request):
             insper_username, insper_password
         )
 
-        if not is_valid:
+        if not is_valid or not user_data:
             messages.error(
                 request,
                 f"Erro ao validar credenciais: {error_message or 'Credenciais inválidas'}",
@@ -114,19 +114,16 @@ def setup_credentials(request):
             )
 
         try:
-            # Criptografar a senha antes de salvar
             encrypted_password = encrypt_insper_password(insper_password)
 
-            # Salvar credenciais
-            request.user.insper_username = insper_username
-            request.user.insper_password = encrypted_password
-            request.user.credentials_configured = True
+            request.user.update_insper_credentials(
+                insper_username, encrypted_password, user_data.id
+            )
 
-            # Atualizar nome do usuário se disponível
-            if user_data:
-                request.user.name = user_data.name
-
+            request.user.name = user_data.name
             request.user.save()
+
+            update_user_insper_academic_data.delay(request.user.id)
 
             messages.success(
                 request,
