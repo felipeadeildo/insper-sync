@@ -1,243 +1,347 @@
 {% extends 'base.html' %}
 
-<!--  -->
 {% block title %}Termos de Uso - Insper Sync{% endblock %}
 
-<!--  -->
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-  <!-- Header -->
-  <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-primary mb-4">Termos de Uso</h1>
-    <p class="text-lg text-base-content/70">
-      Última atualização: 25 de maio de 2025
-    </p>
-  </div>
+<div class="min-h-screen bg-gradient-to-br from-base-200/30 to-base-300/30 py-8">
+  <div class="container mx-auto px-4 max-w-5xl">
+    
+    <!-- Breadcrumb -->
+    <div class="breadcrumbs text-sm mb-6">
+      <ul>
+        <li><a href="/" class="link link-hover">Início</a></li>
+        <li class="text-base-content/60">Termos de Uso</li>
+      </ul>
+    </div>
 
-  <!-- Content -->
-  <div class="prose prose-lg max-w-none">
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body space-y-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 bg-primary/20 text-primary rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <i data-lucide="file-text" class="w-8 h-8"></i>
+      </div>
+      <h1 class="text-3xl lg:text-4xl font-bold text-primary mb-4">Termos de Uso</h1>
+      <div class="flex items-center justify-center gap-2 text-base-content/70">
+        <i data-lucide="calendar" class="w-4 h-4"></i>
+        <span>Última atualização: 25 de maio de 2025</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="card bg-base-100 shadow-xl border border-base-300/50">
+      <div class="card-body p-8 lg:p-12 space-y-10">
+        
         <!-- Seção 1: Aceitação dos Termos -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            1. Aceitação dos Termos
-          </h2>
-          <p class="text-base-content/80 leading-relaxed">
-            Ao utilizar o Insper Sync, você concorda com estes termos de uso. Se
-            você não concordar com qualquer parte destes termos, não utilize
-            nosso serviço.
-          </p>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-primary/20 text-primary rounded-lg flex items-center justify-center text-sm font-bold">
+              1
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Aceitação dos Termos</h2>
+          </div>
+          <div class="pl-11">
+            <p class="text-base-content/80 leading-relaxed">
+              Ao utilizar o Insper Sync, você concorda com estes termos de uso. Se você não concordar com qualquer parte destes termos, não utilize nosso serviço.
+            </p>
+          </div>
         </section>
 
         <!-- Seção 2: Descrição do Serviço -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            2. Descrição do Serviço
-          </h2>
-          <p class="text-base-content/80 leading-relaxed mb-4">
-            O Insper Sync é um serviço que permite a sincronização automática do
-            calendário acadêmico do Insper com o Google Calendar dos estudantes.
-          </p>
-          <div class="alert alert-info">
-            <i data-lucide="info" class="w-5 h-5"></i>
-            <span
-              >Este é um projeto acadêmico desenvolvido por estudantes para
-              estudantes do Insper.</span
-            >
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-secondary/20 text-secondary rounded-lg flex items-center justify-center text-sm font-bold">
+              2
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Descrição do Serviço</h2>
+          </div>
+          <div class="pl-11 space-y-4">
+            <p class="text-base-content/80 leading-relaxed">
+              O Insper Sync é um serviço que permite a sincronização automática do calendário acadêmico do Insper com o Google Calendar dos estudantes.
+            </p>
+            <div class="bg-info/10 border border-info/20 rounded-lg p-4">
+              <div class="flex items-center gap-2 text-info mb-2">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                <span class="font-semibold">Importante</span>
+              </div>
+              <p class="text-sm text-base-content/80">
+                Este é um projeto acadêmico desenvolvido por estudantes para estudantes do Insper, sem fins lucrativos.
+              </p>
+            </div>
           </div>
         </section>
 
         <!-- Seção 3: Elegibilidade -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">3. Elegibilidade</h2>
-          <ul class="list-disc list-inside space-y-2 text-base-content/80">
-            <li>Você deve ser estudante ativo do Insper</li>
-            <li>
-              Você deve possuir um email institucional válido
-              (@al.insper.edu.br)
-            </li>
-            <li>Você deve ter acesso ao Portal Acadêmico do Insper</li>
-            <li>Você deve possuir uma conta do Google válida</li>
-          </ul>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-accent/20 text-accent rounded-lg flex items-center justify-center text-sm font-bold">
+              3
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Elegibilidade</h2>
+          </div>
+          <div class="pl-11">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="w-5 h-5 text-success mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Você deve ser estudante ativo do Insper</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="w-5 h-5 text-success mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Possuir email institucional válido (@al.insper.edu.br)</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="w-5 h-5 text-success mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Ter acesso ao Portal Acadêmico do Insper</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="w-5 h-5 text-success mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Possuir uma conta do Google válida</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Seção 4: Coleta e Uso de Dados -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            4. Coleta e Uso de Dados
-          </h2>
-          <p class="text-base-content/80 leading-relaxed mb-4">
-            Para fornecer nosso serviço, coletamos e armazenamos as seguintes
-            informações:
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="card bg-primary/10 border border-primary/20">
-              <div class="card-body p-4">
-                <h3 class="font-semibold text-primary mb-2">
-                  📧 Email Institucional
-                </h3>
-                <p class="text-sm text-base-content/70">
-                  Usado para identificação e verificação da elegibilidade como
-                  estudante do Insper.
-                </p>
-              </div>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-warning/20 text-warning rounded-lg flex items-center justify-center text-sm font-bold">
+              4
             </div>
-
-            <div class="card bg-secondary/10 border border-secondary/20">
-              <div class="card-body p-4">
-                <h3 class="font-semibold text-secondary mb-2">
-                  👤 Nome de Usuário
-                </h3>
-                <p class="text-sm text-base-content/70">
-                  Extraído do Portal Acadêmico para personalização da
-                  experiência.
-                </p>
-              </div>
-            </div>
-
-            <div class="card bg-accent/10 border border-accent/20">
-              <div class="card-body p-4">
-                <h3 class="font-semibold text-accent mb-2">🔐 Credenciais</h3>
-                <p class="text-sm text-base-content/70">
-                  Senha do Portal Acadêmico criptografada com a chave pública do
-                  Insper.
-                </p>
-              </div>
-            </div>
+            <h2 class="text-2xl font-bold text-primary">Coleta e Uso de Dados</h2>
           </div>
+          <div class="pl-11 space-y-6">
+            <p class="text-base-content/80 leading-relaxed">
+              Para fornecer nosso serviço, coletamos e armazenamos as seguintes informações:
+            </p>
 
-          <div class="alert alert-success">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-            <div>
-              <h4 class="font-semibold">Segurança Garantida</h4>
-              <p class="text-sm">
-                Suas credenciais são criptografadas usando a chave pública
-                oficial do Insper, garantindo máxima segurança.
-              </p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div class="card bg-primary/5 border border-primary/20">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center">
+                      <i data-lucide="mail" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="font-semibold text-primary">Email Institucional</h3>
+                  </div>
+                  <p class="text-sm text-base-content/70 leading-relaxed">
+                    Usado para identificação e verificação da elegibilidade como estudante do Insper.
+                  </p>
+                </div>
+              </div>
+
+              <div class="card bg-secondary/5 border border-secondary/20">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 bg-secondary/20 text-secondary rounded-full flex items-center justify-center">
+                      <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="font-semibold text-secondary">Nome de Usuário</h3>
+                  </div>
+                  <p class="text-sm text-base-content/70 leading-relaxed">
+                    Extraído do Portal Acadêmico para personalização da experiência do usuário.
+                  </p>
+                </div>
+              </div>
+
+              <div class="card bg-accent/5 border border-accent/20">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 bg-accent/20 text-accent rounded-full flex items-center justify-center">
+                      <i data-lucide="key" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="font-semibold text-accent">Credenciais</h3>
+                  </div>
+                  <p class="text-sm text-base-content/70 leading-relaxed">
+                    Senha do Portal Acadêmico criptografada com a chave pública oficial do Insper.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-success/10 border border-success/20 rounded-lg p-6">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 bg-success/20 text-success rounded-full flex items-center justify-center flex-shrink-0">
+                  <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-success mb-2">Segurança Garantida</h4>
+                  <p class="text-sm text-base-content/80 leading-relaxed">
+                    Suas credenciais são criptografadas usando a chave pública oficial do Insper, garantindo máxima segurança. Nem nossa equipe consegue acessar sua senha real.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- Seção 5: Responsabilidades do Usuário -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            5. Responsabilidades do Usuário
-          </h2>
-          <ul class="list-disc list-inside space-y-2 text-base-content/80">
-            <li>Manter suas credenciais de acesso seguras e atualizadas</li>
-            <li>Usar o serviço apenas para fins acadêmicos legítimos</li>
-            <li>
-              Não tentar comprometer a segurança ou funcionalidade do sistema
-            </li>
-            <li>Reportar qualquer problema ou comportamento suspeito</li>
-            <li>
-              Respeitar os termos de uso do Google Calendar e do Portal
-              Acadêmico do Insper
-            </li>
-          </ul>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-info/20 text-info rounded-lg flex items-center justify-center text-sm font-bold">
+              5
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Responsabilidades do Usuário</h2>
+          </div>
+          <div class="pl-11">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-start gap-3">
+                <i data-lucide="shield" class="w-5 h-5 text-info mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Manter suas credenciais de acesso seguras e atualizadas</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="graduation-cap" class="w-5 h-5 text-info mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Usar o serviço apenas para fins acadêmicos legítimos</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="lock" class="w-5 h-5 text-info mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Não tentar comprometer a segurança do sistema</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-info mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Reportar qualquer problema ou comportamento suspeito</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Seção 6: Limitações do Serviço -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            6. Limitações do Serviço
-          </h2>
-          <div class="alert alert-warning">
-            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-            <div>
-              <h4 class="font-semibold">Importante</h4>
-              <p class="text-sm">
-                O serviço é fornecido "como está" sem garantias de
-                disponibilidade contínua ou precisão absoluta dos dados.
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-warning/20 text-warning rounded-lg flex items-center justify-center text-sm font-bold">
+              6
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Limitações do Serviço</h2>
+          </div>
+          <div class="pl-11 space-y-4">
+            <div class="bg-warning/10 border border-warning/20 rounded-lg p-4">
+              <div class="flex items-center gap-2 text-warning mb-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                <span class="font-semibold">Importante</span>
+              </div>
+              <p class="text-sm text-base-content/80">
+                O serviço é fornecido "como está" sem garantias de disponibilidade contínua ou precisão absoluta dos dados.
               </p>
             </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-start gap-3">
+                <i data-lucide="wifi-off" class="w-5 h-5 text-warning mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Não garantimos 100% de uptime do serviço</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="clock" class="w-5 h-5 text-warning mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Podem ocorrer atrasos na sincronização dos eventos</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="server" class="w-5 h-5 text-warning mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Dependemos da disponibilidade do Portal Acadêmico</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i data-lucide="refresh-cw" class="w-5 h-5 text-warning mt-0.5 flex-shrink-0"></i>
+                <span class="text-base-content/80">Mudanças no sistema do Insper podem afetar o serviço</span>
+              </div>
+            </div>
           </div>
-          <ul class="list-disc list-inside space-y-2 text-base-content/80 mt-4">
-            <li>Não garantimos 100% de uptime do serviço</li>
-            <li>Podem ocorrer atrasos na sincronização dos eventos</li>
-            <li>
-              O serviço depende da disponibilidade do Portal Acadêmico do Insper
-            </li>
-            <li>
-              Mudanças no sistema do Insper podem afetar temporariamente o
-              funcionamento
-            </li>
-          </ul>
         </section>
 
-        <!-- Seção 7: Propriedade Intelectual -->
+        <!-- Seção 7: Modificações -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            7. Propriedade Intelectual
-          </h2>
-          <p class="text-base-content/80 leading-relaxed">
-            O código-fonte do Insper Sync é distribuído sob licença open source.
-            Os dados acadêmicos permanecem propriedade do Insper. O usuário
-            mantém os direitos sobre seus dados pessoais e eventos do Google
-            Calendar.
-          </p>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-neutral/20 text-neutral rounded-lg flex items-center justify-center text-sm font-bold">
+              7
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Modificações dos Termos</h2>
+          </div>
+          <div class="pl-11">
+            <p class="text-base-content/80 leading-relaxed">
+              Reservamos o direito de modificar estes termos a qualquer momento. Usuários serão notificados sobre mudanças significativas por email. O uso continuado do serviço após as modificações constitui aceitação dos novos termos.
+            </p>
+          </div>
         </section>
 
-        <!-- Seção 8: Modificações -->
+        <!-- Seção 8: Cancelamento -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            8. Modificações dos Termos
-          </h2>
-          <p class="text-base-content/80 leading-relaxed">
-            Reservamos o direito de modificar estes termos a qualquer momento.
-            Usuários serão notificados sobre mudanças significativas por email.
-            O uso continuado do serviço após as modificações constitui aceitação
-            dos novos termos.
-          </p>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-error/20 text-error rounded-lg flex items-center justify-center text-sm font-bold">
+              8
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Cancelamento do Serviço</h2>
+          </div>
+          <div class="pl-11 space-y-4">
+            <p class="text-base-content/80 leading-relaxed">
+              Você pode cancelar sua conta a qualquer momento através do dashboard. Ao cancelar:
+            </p>
+            
+            <div class="bg-error/5 border border-error/20 rounded-lg p-4">
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="trash-2" class="w-4 h-4 text-error"></i>
+                  <span class="text-sm text-base-content/80">Todos os seus dados serão removidos permanentemente</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="pause" class="w-4 h-4 text-error"></i>
+                  <span class="text-sm text-base-content/80">A sincronização com o Google Calendar será interrompida</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="calendar" class="w-4 h-4 text-error"></i>
+                  <span class="text-sm text-base-content/80">Os eventos já sincronizados permanecerão no seu Google Calendar</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <!-- Seção 9: Cancelamento -->
+        <!-- Seção 9: Contato -->
         <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">
-            9. Cancelamento do Serviço
-          </h2>
-          <p class="text-base-content/80 leading-relaxed mb-4">
-            Você pode cancelar sua conta a qualquer momento através do
-            dashboard. Ao cancelar:
-          </p>
-          <ul class="list-disc list-inside space-y-2 text-base-content/80">
-            <li>Todos os seus dados serão removidos permanentemente</li>
-            <li>A sincronização com o Google Calendar será interrompida</li>
-            <li>
-              Os eventos já sincronizados permanecerão no seu Google Calendar
-            </li>
-          </ul>
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-success/20 text-success rounded-lg flex items-center justify-center text-sm font-bold">
+              9
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Contato</h2>
+          </div>
+          <div class="pl-11">
+            <p class="text-base-content/80 leading-relaxed mb-4">
+              Para dúvidas sobre estes termos ou sobre o funcionamento do serviço:
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="https://github.com/felipeadeildo/insper-sync" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+                <i data-lucide="github" class="w-4 h-4"></i>
+                GitHub
+              </a>
+              <a href="mailto:fa@insper.dev" class="btn btn-outline btn-sm">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+                Email do Desenvolvedor
+              </a>
+            </div>
+          </div>
         </section>
+      </div>
+    </div>
 
-        <!-- Seção 10: Contato -->
-        <section>
-          <h2 class="text-2xl font-bold text-primary mb-4">10. Contato</h2>
-          <p class="text-base-content/80 leading-relaxed">
-            Para dúvidas sobre estes termos ou sobre o funcionamento do serviço,
-            entre em contato conosco através do GitHub ou pelo email do
-            desenvolvedor.
-          </p>
-        </section>
+    <!-- Footer Info -->
+    <div class="text-center mt-8 p-6 bg-base-100/50 backdrop-blur-sm rounded-lg border border-base-300/50">
+      <div class="flex items-center justify-center gap-2 text-sm text-base-content/60 mb-4">
+        <i data-lucide="calendar" class="w-4 h-4"></i>
+        <span>Este documento foi atualizado pela última vez em 25 de maio de 2025</span>
+      </div>
+      
+      <!-- Navigation -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="/" class="btn btn-primary">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          Voltar ao Início
+        </a>
 
-        <!-- Data da última atualização -->
-        <div class="divider"></div>
-        <div class="text-center">
-          <p class="text-sm text-base-content/50">
-            Este documento foi atualizado pela última vez em 25 de maio de 2025.
-          </p>
+        <div class="text-xs text-base-content/50">
+          Versão 1.0 dos Termos de Uso
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Botão para voltar -->
-  <div class="text-center mt-8">
-    <a href="/" class="btn btn-primary">
-      <i data-lucide="arrow-left" class="w-4 h-4"></i>
-      Voltar ao Início
-    </a>
-  </div>
 </div>
+
+<script>
+  // Initialize Lucide icons
+  document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+  });
+</script>
 {% endblock %}

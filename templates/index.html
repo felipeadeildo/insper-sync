@@ -1,246 +1,342 @@
 {% extends 'base.html' %}
 
-<!--  -->
-{% block title %}Insper Sync - Sincronize seu calendário do Insper
-automaticamente{% endblock %}
+{% block title %}Insper Sync - Sincronize seu calendário do Insper automaticamente{% endblock %}
 
-<!--  -->
 {% block content %}
 <!-- Hero Section with Login -->
-<div
-  class="hero min-h-[80vh] bg-gradient-to-br from-primary/10 to-secondary/10"
->
-  <div class="hero-content flex-col lg:flex-row-reverse gap-12">
-    <!-- Login Card -->
-    <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-      <div class="card-body">
-        {% if user.is_authenticated %}
-        <h2 class="card-title text-2xl text-center mb-6">
-          <span class="text-success text-center">Bem-vindo de volta!</span>
-        </h2>
+<section class="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 flex items-center">
+  <div class="container mx-auto px-4 py-12">
+    <div class="flex flex-col lg:flex-row items-center gap-12 max-w-7xl mx-auto">
+      
+      <!-- Hero Content -->
+      <div class="flex-1 text-center lg:text-left">
+        <div class="text-6xl mb-6">📅</div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6 leading-tight">
+          Insper Sync
+        </h1>
+        <p class="text-lg md:text-xl mb-8 text-base-content/80 max-w-2xl">
+          Sincronize automaticamente seu calendário acadêmico do Insper com o Google Calendar e nunca mais perca um evento importante.
+        </p>
 
-        <div class="text-center space-y-6">
-          <!-- Avatar usando Tailwind CSS puro -->
-          <div class="flex justify-center">
-            <div
-              class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-lg"
-            >
-              <span class="text-2xl font-bold text-white"
-                >{{ user.email.0|upper }}</span
-              >
+        <!-- Features List -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-2xl">
+          <div class="flex items-center gap-3 p-3 bg-base-100/50 rounded-lg backdrop-blur-sm">
+            <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
             </div>
+            <span class="text-sm font-medium">Sincronização automática</span>
           </div>
-
-          <div class="space-y-2">
-            <p class="font-semibold text-lg">{{ user.email }}</p>
-            <div class="badge badge-success badge-outline">
-              <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
-              Conta verificada
+          
+          <div class="flex items-center gap-3 p-3 bg-base-100/50 rounded-lg backdrop-blur-sm">
+            <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
             </div>
+            <span class="text-sm font-medium">Credenciais seguras</span>
           </div>
-
-          <div class="alert alert-success">
-            <i data-lucide="info" class="w-5 h-5"></i>
-            <span>Sua conta está configurada e pronta para uso!</span>
+          
+          <div class="flex items-center gap-3 p-3 bg-base-100/50 rounded-lg backdrop-blur-sm">
+            <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </div>
+            <span class="text-sm font-medium">Setup em 5 minutos</span>
           </div>
-
-          <div class="space-y-3">
-            <a href="{% url 'dashboard' %}" class="btn btn-primary w-full">
-              <i data-lucide="layout-dashboard" class="w-5 h-5 mr-2"></i>
-              Acessar Dashboard
-            </a>
-
-            <a
-              href="{% url 'setup_credentials' %}"
-              class="btn btn-outline w-full"
-            >
-              <i data-lucide="settings" class="w-5 h-5 mr-2"></i>
-              Configurações
-            </a>
+          
+          <div class="flex items-center gap-3 p-3 bg-base-100/50 rounded-lg backdrop-blur-sm">
+            <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+            </div>
+            <span class="text-sm font-medium">100% gratuito</span>
           </div>
         </div>
-        {% else %}
-        <h2 class="card-title text-2xl text-center mb-4">
-          <span class="text-primary">Comece Agora</span>
-        </h2>
 
-        <form method="post" action="{% url 'verify_email' %}">
-          {% csrf_token %}
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold">Email do Insper</span>
-            </label>
-            <div class="relative">
-              <input
-                type="email"
-                name="email"
-                placeholder="seu.email@al.insper.edu.br"
-                class="input input-bordered input-primary w-full pl-10"
-                required
-                pattern=".*@(al\.)?insper\.edu\.br$"
-                title="Use apenas emails do Insper (@al.insper.edu.br ou @insper.edu.br)"
-              />
-              <i
-                data-lucide="mail"
-                class="w-5 h-5 absolute left-3 top-3 text-primary pointer-events-none z-10"
-              ></i>
-            </div>
-            <label class="label">
-              <span class="label-text-alt text-base-content/60">
-                Apenas emails do Insper são aceitos
-              </span>
-            </label>
+        <!-- CTA for mobile when not authenticated -->
+        {% if not user.is_authenticated %}
+          <div class="lg:hidden">
+            <a href="#login" class="btn btn-primary btn-lg">
+              <i data-lucide="log-in" class="w-5 h-5"></i>
+              Começar Agora
+            </a>
           </div>
-
-          <div class="form-control mt-6">
-            <button type="submit" class="btn btn-primary">
-              <i data-lucide="send" class="w-5 h-5 mr-2"></i>
-              Enviar Token de Verificação
-            </button>
-          </div>
-        </form>
         {% endif %}
       </div>
-    </div>
 
-    <!-- Hero Content -->
-    <div class="text-center lg:text-left">
-      <div class="text-6xl mb-4">📅</div>
-      <h1 class="text-5xl font-bold text-primary mb-6">Insper Sync</h1>
-      <p class="text-xl mb-8 text-base-content/80 max-w-lg">
-        Sincronize automaticamente seu calendário acadêmico do Insper com o
-        Google Calendar
-      </p>
+      <!-- Login/User Card -->
+      <div class="w-full max-w-md" id="login">
+        <div class="card bg-base-100 shadow-2xl border border-base-300/50">
+          <div class="card-body p-6">
+            {% if user.is_authenticated %}
+              <!-- User Welcome -->
+              <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-success mb-4">
+                  Bem-vindo de volta!
+                </h2>
 
-      <!-- Features List -->
-      <div class="space-y-3 mb-8">
-        <div class="flex items-center gap-3">
-          <i data-lucide="check-circle" class="w-5 h-5 text-success"></i>
-          <span>Sincronização automática</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <i data-lucide="shield-check" class="w-5 h-5 text-success"></i>
-          <span>Credenciais seguras e criptografadas</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <i data-lucide="zap" class="w-5 h-5 text-success"></i>
-          <span>Configuração em menos de 5 minutos</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <i data-lucide="heart" class="w-5 h-5 text-success"></i>
-          <span>100% gratuito para estudantes</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                <!-- User Avatar -->
+                <div class="flex justify-center mb-4">
+                  <div class="w-20 h-20 bg-success text-white rounded-full flex items-center justify-center shadow-lg">
+                    <span class="text-2xl font-bold">{{ user.email.0|upper }}</span>
+                  </div>
+                </div>
 
-<!-- Como Funciona Section -->
-<section id="sobre" class="py-16 bg-base-100">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center text-primary mb-12">
-      Como Funciona?
-    </h2>
+                <div class="space-y-2 mb-6">
+                  <p class="font-semibold text-lg">{{ user.name|default:user.email|cut:"@al.insper.edu.br"|cut:"@insper.edu.br" }}</p>
+                  <p class="text-sm text-base-content/70 break-all">{{ user.email }}</p>
+                  <div class="badge badge-success badge-outline">
+                    <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                    Conta verificada
+                  </div>
+                </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-      <!-- Step 1 -->
-      <div class="text-center">
-        <div
-          class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <span class="text-2xl text-primary-content font-bold">1</span>
-        </div>
-        <h3 class="text-lg font-bold mb-2">Verifique seu Email</h3>
-        <p class="text-sm text-base-content/70">
-          Digite seu email do Insper e confirme através do token enviado
-        </p>
-      </div>
+                <div class="bg-success/10 p-4 rounded-lg mb-6">
+                  <div class="flex items-center gap-2 text-success">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    <span class="text-sm font-medium">Sua conta está configurada e pronta!</span>
+                  </div>
+                </div>
 
-      <!-- Step 2 -->
-      <div class="text-center">
-        <div
-          class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <span class="text-2xl text-secondary-content font-bold">2</span>
-        </div>
-        <h3 class="text-lg font-bold mb-2">Configure Credenciais</h3>
-        <p class="text-sm text-base-content/70">
-          Adicione sua senha do Portal Acadêmico de forma segura
-        </p>
-      </div>
+                <div class="space-y-3">
+                  <a href="{% url 'dashboard' %}" class="btn btn-primary w-full">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Acessar Dashboard
+                  </a>
 
-      <!-- Step 3 -->
-      <div class="text-center">
-        <div
-          class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <span class="text-2xl text-accent-content font-bold">3</span>
+                  <a href="{% url 'setup_credentials' %}" class="btn btn-outline w-full">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    Configurações
+                  </a>
+                </div>
+              </div>
+
+            {% else %}
+              <!-- Login Form -->
+              <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-primary mb-2">
+                  Comece Agora
+                </h2>
+                <p class="text-base-content/70">
+                  Entre com seu email do Insper para começar
+                </p>
+              </div>
+
+              <form method="post" action="{% url 'verify_email' %}" class="space-y-4">
+                {% csrf_token %}
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-semibold">Email do Insper</span>
+                  </label>
+                  <div class="relative">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="seu.email@al.insper.edu.br"
+                      class="input input-bordered input-primary w-full pl-10 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      required
+                      pattern=".*@(al\.)?insper\.edu\.br$"
+                      title="Use apenas emails do Insper (@al.insper.edu.br ou @insper.edu.br)"
+                    />
+                    <i data-lucide="mail" class="w-5 h-5 absolute left-3 top-3 text-primary pointer-events-none"></i>
+                  </div>
+                  <label class="label">
+                    <span class="label-text-alt text-base-content/60">
+                      Apenas emails do Insper são aceitos
+                    </span>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full">
+                  <i data-lucide="send" class="w-5 h-5"></i>
+                  Enviar Token de Verificação
+                </button>
+              </form>
+            {% endif %}
+          </div>
         </div>
-        <h3 class="text-lg font-bold mb-2">Conecte ao Google</h3>
-        <p class="text-sm text-base-content/70">
-          Autorize a sincronização com seu Google Calendar
-        </p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FAQ Section -->
-<section class="py-16 bg-base-200">
+<!-- Como Funciona Section -->
+<section id="sobre" class="py-16 lg:py-24 bg-base-100">
   <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center text-primary mb-12">
-      Perguntas Frequentes
-    </h2>
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-4">
+        Como Funciona?
+      </h2>
+      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
+        Configure sua sincronização em apenas 3 passos simples
+      </p>
+    </div>
 
-    <div class="max-w-2xl mx-auto space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <!-- Step 1 -->
+      <div class="text-center group">
+        <div class="relative mb-6">
+          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto shadow-lg group-hover:scale-105 transition-transform">
+            <span class="text-2xl text-primary-content font-bold">1</span>
+          </div>
+          <div class="absolute -top-2 -right-2 w-8 h-8 bg-primary/20 rounded-full animate-ping"></div>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Verifique seu Email</h3>
+        <p class="text-base-content/70 text-sm leading-relaxed">
+          Digite seu email do Insper e confirme através do token enviado para sua caixa de entrada
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="text-center group">
+        <div class="relative mb-6">
+          <div class="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto shadow-lg group-hover:scale-105 transition-transform">
+            <span class="text-2xl text-secondary-content font-bold">2</span>
+          </div>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Configure Credenciais</h3>
+        <p class="text-base-content/70 text-sm leading-relaxed">
+          Adicione suas credenciais do Portal Acadêmico de forma segura com criptografia de ponta
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="text-center group">
+        <div class="relative mb-6">
+          <div class="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto shadow-lg group-hover:scale-105 transition-transform">
+            <span class="text-2xl text-accent-content font-bold">3</span>
+          </div>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Conecte ao Google</h3>
+        <p class="text-base-content/70 text-sm leading-relaxed">
+          Autorize a sincronização com seu Google Calendar e pronto! Seus eventos aparecerão automaticamente
+        </p>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    {% if not user.is_authenticated %}
+      <div class="text-center mt-12">
+        <a href="#login" class="btn btn-primary btn-lg">
+          <i data-lucide="arrow-up" class="w-5 h-5"></i>
+          Começar Agora
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16 lg:py-24 bg-base-200">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-4">
+        Perguntas Frequentes
+      </h2>
+      <p class="text-lg text-base-content/70">
+        Tire suas principais dúvidas sobre o Insper Sync
+      </p>
+    </div>
+
+    <div class="max-w-3xl mx-auto space-y-4">
       <!-- FAQ 1 -->
-      <div class="collapse collapse-plus bg-base-100">
+      <div class="collapse collapse-plus bg-base-100 shadow-sm">
         <input type="radio" name="faq-accordion" checked="checked" />
-        <div class="collapse-title text-lg font-medium">
+        <div class="collapse-title text-lg font-medium pr-8">
+          <i data-lucide="shield-question" class="w-5 h-5 inline mr-3 text-primary"></i>
           É seguro fornecer minha senha do Insper?
         </div>
         <div class="collapse-content">
-          <p class="text-base-content/70 mb-4">
-            Sim, suas credenciais são totalmente seguras. Armazenamos apenas três informações essenciais:
-          </p>
-          <ul class="list-disc list-inside text-base-content/70 space-y-2">
-            <li><strong>Email institucional:</strong> usado para verificação e identificação</li>
-            <li><strong>Nome de usuário:</strong> extraído do Portal Acadêmico para personalização</li>
-            <li><strong>Senha criptografada:</strong> protegida com a chave pública oficial do Insper</li>
-          </ul>
-          <div class="alert alert-info mt-4">
-            <i data-lucide="shield" class="w-4 h-4"></i>
-            <span class="text-sm">A criptografia com chave pública garante que nem nossa equipe consegue acessar sua senha real.</span>
+          <div class="pl-8 space-y-4">
+            <p class="text-base-content/80 leading-relaxed">
+              Sim, suas credenciais são totalmente seguras. Utilizamos as melhores práticas de segurança:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="p-4 bg-primary/5 rounded-lg">
+                <div class="flex items-center gap-2 mb-2">
+                  <i data-lucide="mail" class="w-4 h-4 text-primary"></i>
+                  <span class="font-semibold text-sm">Email institucional</span>
+                </div>
+                <p class="text-xs text-base-content/70">
+                  Usado apenas para verificação e identificação
+                </p>
+              </div>
+              
+              <div class="p-4 bg-secondary/5 rounded-lg">
+                <div class="flex items-center gap-2 mb-2">
+                  <i data-lucide="user" class="w-4 h-4 text-secondary"></i>
+                  <span class="font-semibold text-sm">Nome de usuário</span>
+                </div>
+                <p class="text-xs text-base-content/70">
+                  Extraído do Portal para personalização
+                </p>
+              </div>
+              
+              <div class="p-4 bg-accent/5 rounded-lg">
+                <div class="flex items-center gap-2 mb-2">
+                  <i data-lucide="key" class="w-4 h-4 text-accent"></i>
+                  <span class="font-semibold text-sm">Senha criptografada</span>
+                </div>
+                <p class="text-xs text-base-content/70">
+                  Protegida com chave pública oficial
+                </p>
+              </div>
+            </div>
+            
+            <div class="bg-info/10 p-4 rounded-lg border border-info/20">
+              <div class="flex items-center gap-2 text-info">
+                <i data-lucide="shield" class="w-4 h-4"></i>
+                <span class="text-sm font-medium">
+                  A criptografia com chave pública garante que nem nossa equipe consegue acessar sua senha real.
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- FAQ 2 -->
-      <div class="collapse collapse-plus bg-base-100">
+      <div class="collapse collapse-plus bg-base-100 shadow-sm">
         <input type="radio" name="faq-accordion" />
-        <div class="collapse-title text-lg font-medium">
+        <div class="collapse-title text-lg font-medium pr-8">
+          <i data-lucide="clock" class="w-5 h-5 inline mr-3 text-primary"></i>
           Com que frequência os eventos são sincronizados?
         </div>
         <div class="collapse-content">
-          <p class="text-base-content/70">
-            A sincronização acontece automaticamente a cada 6 horas, garantindo
-            que seus eventos estejam sempre atualizados.
-          </p>
+          <div class="pl-8">
+            <p class="text-base-content/80 leading-relaxed">
+              A sincronização acontece automaticamente a cada 6 horas por padrão, mas você pode configurar para ser mais frequente (a cada 1 hora) ou menos frequente (uma vez por dia) conforme sua preferência.
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- FAQ 3 -->
-      <div class="collapse collapse-plus bg-base-100">
+      <div class="collapse collapse-plus bg-base-100 shadow-sm">
         <input type="radio" name="faq-accordion" />
-        <div class="collapse-title text-lg font-medium">
+        <div class="collapse-title text-lg font-medium pr-8">
+          <i data-lucide="x-circle" class="w-5 h-5 inline mr-3 text-primary"></i>
           Posso cancelar a sincronização?
         </div>
         <div class="collapse-content">
-          <p class="text-base-content/70">
-            Claro! Você pode cancelar através do painel de controle e seus dados
-            serão removidos completamente de nossos servidores.
-          </p>
+          <div class="pl-8">
+            <p class="text-base-content/80 leading-relaxed">
+              Claro! Você pode desabilitar ou cancelar a sincronização a qualquer momento através do painel de controle. Seus dados serão removidos completamente de nossos servidores se você escolher deletar sua conta.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="collapse collapse-plus bg-base-100 shadow-sm">
+        <input type="radio" name="faq-accordion" />
+        <div class="collapse-title text-lg font-medium pr-8">
+          <i data-lucide="smartphone" class="w-5 h-5 inline mr-3 text-primary"></i>
+          Funciona no celular?
+        </div>
+        <div class="collapse-content">
+          <div class="pl-8">
+            <p class="text-base-content/80 leading-relaxed">
+              Sim! Uma vez configurado, seus eventos aparecerão automaticamente no app do Google Calendar no seu celular, tablet e qualquer dispositivo onde você esteja logado na sua conta Google.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -248,92 +344,148 @@ automaticamente{% endblock %}
 </section>
 
 <!-- Privacidade Section -->
-<section id="privacidade" class="py-16 bg-base-100">
+<section id="privacidade" class="py-16 lg:py-24 bg-base-100">
   <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center text-primary mb-12">
-      Sua Privacidade em Primeiro Lugar
-    </h2>
+    <div class="text-center mb-16">
+      <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-4">
+        Sua Privacidade em Primeiro Lugar
+      </h2>
+      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
+        Transparência total sobre como tratamos seus dados
+      </p>
+    </div>
 
-    <div class="max-w-4xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <!-- Dados Coletados -->
-        <div class="card bg-primary/5 border border-primary/20">
-          <div class="card-body">
+        <div class="card bg-primary/5 border border-primary/20 shadow-sm">
+          <div class="card-body p-6">
             <h3 class="card-title text-primary mb-4">
               <i data-lucide="database" class="w-5 h-5"></i>
               Dados Armazenados
             </h3>
-            <ul class="space-y-2 text-sm">
-              <li class="flex items-center gap-2">
-                <i data-lucide="mail" class="w-4 h-4 text-primary"></i>
-                Email institucional
-              </li>
-              <li class="flex items-center gap-2">
-                <i data-lucide="user" class="w-4 h-4 text-primary"></i>
-                Nome de usuário
-              </li>
-              <li class="flex items-center gap-2">
-                <i data-lucide="key" class="w-4 h-4 text-primary"></i>
-                Senha criptografada
-              </li>
-            </ul>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center">
+                  <i data-lucide="mail" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Email institucional</p>
+                  <p class="text-xs text-base-content/60">Verificação e login</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center">
+                  <i data-lucide="user" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Nome de usuário</p>
+                  <p class="text-xs text-base-content/60">Personalização</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center">
+                  <i data-lucide="key" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Senha criptografada</p>
+                  <p class="text-xs text-base-content/60">Acesso ao portal</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Segurança -->
-        <div class="card bg-success/5 border border-success/20">
-          <div class="card-body">
+        <div class="card bg-success/5 border border-success/20 shadow-sm">
+          <div class="card-body p-6">
             <h3 class="card-title text-success mb-4">
               <i data-lucide="shield-check" class="w-5 h-5"></i>
               Proteção de Dados
             </h3>
-            <ul class="space-y-2 text-sm">
-              <li class="flex items-center gap-2">
-                <i data-lucide="lock" class="w-4 h-4 text-success"></i>
-                Criptografia RSA
-              </li>
-              <li class="flex items-center gap-2">
-                <i data-lucide="server" class="w-4 h-4 text-success"></i>
-                Servidores seguros
-              </li>
-              <li class="flex items-center gap-2">
-                <i data-lucide="eye-off" class="w-4 h-4 text-success"></i>
-                Acesso zero à senha
-              </li>
-            </ul>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+                  <i data-lucide="lock" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Criptografia RSA</p>
+                  <p class="text-xs text-base-content/60">Chave pública oficial</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+                  <i data-lucide="server" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Servidores seguros</p>
+                  <p class="text-xs text-base-content/60">Infraestrutura protegida</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+                  <i data-lucide="eye-off" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Acesso zero à senha</p>
+                  <p class="text-xs text-base-content/60">Nem nós vemos sua senha</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Controle -->
-        <div class="card bg-accent/5 border border-accent/20">
-          <div class="card-body">
+        <div class="card bg-accent/5 border border-accent/20 shadow-sm">
+          <div class="card-body p-6">
             <h3 class="card-title text-accent mb-4">
               <i data-lucide="settings" class="w-5 h-5"></i>
               Seu Controle
             </h3>
-            <ul class="space-y-2 text-sm">
-              <li class="flex items-center gap-2">
-                <i data-lucide="trash-2" class="w-4 h-4 text-accent"></i>
-                Deletar conta
-              </li>
-              <li class="flex items-center gap-2">
-                <i data-lucide="pause" class="w-4 h-4 text-accent"></i>
-                Pausar sincronização
-              </li>
-              <li class="flex items-center gap-2">
-                <i data-lucide="download" class="w-4 h-4 text-accent"></i>
-                Exportar dados
-              </li>
-            </ul>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-accent/20 text-accent rounded-full flex items-center justify-center">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Deletar conta</p>
+                  <p class="text-xs text-base-content/60">Remove todos os dados</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-accent/20 text-accent rounded-full flex items-center justify-center">
+                  <i data-lucide="pause" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Pausar sincronização</p>
+                  <p class="text-xs text-base-content/60">Desabilitar temporariamente</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-accent/20 text-accent rounded-full flex items-center justify-center">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">Exportar dados</p>
+                  <p class="text-xs text-base-content/60">Download dos seus dados</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="text-center">
-        <div class="alert alert-info inline-flex">
-          <i data-lucide="info" class="w-5 h-5"></i>
-          <span>
-            Não compartilhamos seus dados com terceiros. Seu calendário permanece privado e sob seu controle.
+        <div class="bg-info/10 p-6 rounded-lg border border-info/20 inline-flex items-center gap-3 max-w-2xl">
+          <i data-lucide="info" class="w-6 h-6 text-info"></i>
+          <span class="text-base-content/80">
+            Não compartilhamos seus dados com terceiros. Seu calendário permanece privado e sob seu controle total.
           </span>
         </div>
       </div>

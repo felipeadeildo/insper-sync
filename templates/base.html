@@ -34,11 +34,11 @@
   </head>
   <body class="min-h-screen bg-base-100">
     <!-- Navbar -->
-    <div class="navbar bg-base-200 shadow-lg">
+    <div class="navbar bg-base-200 shadow-lg sticky top-0 z-50">
       <div class="navbar-start">
         <a href="/" class="btn btn-ghost text-xl">
           <span class="text-2xl">📅</span>
-          <span class="font-bold text-primary">Insper Sync</span>
+          <span class="font-bold text-primary hidden sm:inline">Insper Sync</span>
         </a>
       </div>
 
@@ -58,26 +58,29 @@
           <!-- User Dropdown (Desktop) -->
           <div class="dropdown dropdown-end hidden lg:flex mr-4">
             <div tabindex="0" role="button" class="btn btn-ghost">
-              <i data-lucide="user" class="w-5 h-5"></i>
-              <span>{{ user.username|default:"Usuário" }}</span>
+              <!-- Avatar usando Tailwind puro -->
+              <div class="w-8 h-8 bg-primary text-primary-content rounded-full flex items-center justify-center text-sm font-semibold">
+                {{ user.email.0|upper }}
+              </div>
+              <span class="hidden xl:inline">{{ user.name|default:"Usuário" }}</span>
               <i data-lucide="chevron-down" class="w-4 h-4"></i>
             </div>
-            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-48">
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52 border border-base-300">
               <li>
-                <a href="{% url 'dashboard' %}" class="flex items-center gap-2">
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3">
                   <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                   Dashboard
                 </a>
               </li>
               <li>
-                <a href="{% url 'setup_credentials' %}" class="flex items-center gap-2">
+                <a href="{% url 'setup_credentials' %}" class="flex items-center gap-3 p-3">
                   <i data-lucide="settings" class="w-4 h-4"></i>
                   Configurações
                 </a>
               </li>
               <li><hr class="my-1"></li>
               <li>
-                <a href="{% url 'logout' %}" class="flex items-center gap-2 text-error">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 p-3 text-error">
                   <i data-lucide="log-out" class="w-4 h-4"></i>
                   Sair
                 </a>
@@ -89,16 +92,16 @@
           <div class="hidden lg:flex mr-4">
             <a href="/" class="btn btn-primary">
               <i data-lucide="log-in" class="w-4 h-4"></i>
-              Entrar
+              <span class="hidden sm:inline">Entrar</span>
             </a>
           </div>
         {% endif %}
 
         <!-- Theme Toggle -->
-        <label class="swap swap-rotate mr-4">
+        <label class="swap swap-rotate mr-2">
           <input type="checkbox" class="theme-controller" value="dark" />
-          <i data-lucide="sun" class="swap-off w-6 h-6"></i>
-          <i data-lucide="moon" class="swap-on w-6 h-6"></i>
+          <i data-lucide="sun" class="swap-off w-5 h-5"></i>
+          <i data-lucide="moon" class="swap-on w-5 h-5"></i>
         </label>
 
         <!-- Mobile menu -->
@@ -108,33 +111,41 @@
           </div>
           <ul
             tabindex="0"
-            class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-52"
+            class="menu menu-sm dropdown-content mt-3 z-50 p-2 shadow bg-base-100 rounded-box w-64 border border-base-300"
           >
             {% if request.resolver_match.url_name == 'home' or not user.is_authenticated %}
-              <li><a href="/">Início</a></li>
-              <li><a href="#sobre">Como Funciona</a></li>
-              <li><a href="{% url 'terms' %}">Termos de Uso</a></li>
+              <li><a href="/" class="p-3">Início</a></li>
+              <li><a href="#sobre" class="p-3">Como Funciona</a></li>
+              <li><a href="{% url 'terms' %}" class="p-3">Termos de Uso</a></li>
               {% if user.is_authenticated %}
                 <li><hr class="my-1"></li>
               {% endif %}
             {% endif %}
             {% if user.is_authenticated %}
+              <li class="menu-title px-3 py-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-primary text-primary-content rounded-full flex items-center justify-center text-xs font-semibold">
+                    {{ user.email.0|upper }}
+                  </div>
+                  <span class="text-xs truncate">{{ user.email }}</span>
+                </div>
+              </li>
               <li>
-                <a href="{% url 'dashboard' %}" class="flex items-center gap-2">
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3">
                   <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                   Dashboard
                 </a>
               </li>
               <li>
-                <a href="{% url 'setup_credentials' %}" class="flex items-center gap-2">
+                <a href="{% url 'setup_credentials' %}" class="flex items-center gap-3 p-3">
                   <i data-lucide="settings" class="w-4 h-4"></i>
                   Configurações
                 </a>
               </li>
               <li>
-                <a href="{% url 'logout' %}" class="flex items-center gap-2 text-error">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 p-3 text-error">
                   <i data-lucide="log-out" class="w-4 h-4"></i>
-                  Sair ({{ user.username|default:"Usuário" }})
+                  Sair
                 </a>
               </li>
             {% else %}
@@ -142,7 +153,7 @@
                 <li><hr class="my-1"></li>
               {% endif %}
               <li>
-                <a href="/" class="flex items-center gap-2">
+                <a href="/" class="flex items-center gap-3 p-3">
                   <i data-lucide="log-in" class="w-4 h-4"></i>
                   Entrar
                 </a>
@@ -159,11 +170,11 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer footer-center p-10 bg-base-200 text-base-content">
+    <footer class="footer footer-center p-8 bg-base-200 text-base-content border-t border-base-300">
       <nav class="grid grid-flow-col gap-4">
-        <a href="#sobre" class="link link-hover">Como Funciona</a>
-        <a href="#privacidade" class="link link-hover">Privacidade</a>
-        <a href="{% url 'terms' %}" class="link link-hover">Termos de Uso</a>
+        <a href="#sobre" class="link link-hover text-sm">Como Funciona</a>
+        <a href="#privacidade" class="link link-hover text-sm">Privacidade</a>
+        <a href="{% url 'terms' %}" class="link link-hover text-sm">Termos de Uso</a>
       </nav>
       <nav>
         <div class="grid grid-flow-col gap-4">
@@ -171,36 +182,40 @@
             href="https://github.com/felipeadeildo/insper-sync"
             class="link link-hover"
             aria-label="GitHub"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <i data-lucide="github" class="w-6 h-6"></i>
+            <i data-lucide="github" class="w-5 h-5"></i>
           </a>
           <a
             href="mailto:fa@insper.dev"
             class="link link-hover"
             aria-label="Email"
           >
-            <i data-lucide="mail" class="w-6 h-6"></i>
+            <i data-lucide="mail" class="w-5 h-5"></i>
           </a>
         </div>
       </nav>
-      <aside>
+      <aside class="text-center">
         <p class="text-sm">
           © 2025 Insper Sync. Feito com ❤️ para estudantes do Insper.
-          <br />
-          <span class="text-xs opacity-70">
-            Não somos afiliados ao Insper. Este é um projeto independente.
-          </span>
+        </p>
+        <p class="text-xs opacity-70 mt-1">
+          Não somos afiliados ao Insper. Este é um projeto independente.
         </p>
       </aside>
     </footer>
 
     <!-- Toast Container for notifications -->
     <div class="toast toast-top toast-end z-50">
-      {% if messages %} {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }}">
-        <span>{{ message }}</span>
-      </div>
-      {% endfor %} {% endif %}
+      {% if messages %} 
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} shadow-lg max-w-sm">
+            <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5"></i>
+            <span class="text-sm">{{ message }}</span>
+          </div>
+        {% endfor %} 
+      {% endif %}
     </div>
 
     {% block extra_js %}{% endblock %}
@@ -271,13 +286,13 @@
         })
       })
 
-      // Auto-hide alerts after 5 seconds
+      // Auto-hide toasts after 5 seconds (only toasts, not alerts)
       setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert')
-        alerts.forEach((alert) => {
-          alert.style.transition = 'opacity 0.5s'
-          alert.style.opacity = '0'
-          setTimeout(() => alert.remove(), 500)
+        const toasts = document.querySelectorAll('.toast .alert')
+        toasts.forEach((toast) => {
+          toast.style.transition = 'opacity 0.5s'
+          toast.style.opacity = '0'
+          setTimeout(() => toast.remove(), 500)
         })
       }, 5000)
     </script>

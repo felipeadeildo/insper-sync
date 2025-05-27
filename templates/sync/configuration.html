@@ -3,295 +3,362 @@
 {% block title %}Configurações de Sincronização - Insper Sync{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-  <!-- Header -->
-  <div class="mb-8">
-    <div class="breadcrumbs text-sm">
+<div class="min-h-screen bg-gradient-to-br from-base-200/30 to-base-300/30 py-8">
+  <div class="container mx-auto px-4 max-w-5xl">
+    
+    <!-- Breadcrumb -->
+    <div class="breadcrumbs text-sm mb-6">
       <ul>
         <li><a href="{% url 'dashboard' %}" class="link link-hover">Dashboard</a></li>
-        <li>Configurações de Sincronização</li>
+        <li class="text-base-content/60">Configurações de Sincronização</li>
       </ul>
     </div>
     
-    <div class="flex items-center gap-3 mt-4">
-      <i data-lucide="settings" class="w-8 h-8 text-primary"></i>
-      <div>
-        <h1 class="text-3xl font-bold text-base-content">Configurações de Sincronização</h1>
-        <p class="text-base-content/70 mt-1">Personalize como seus eventos do Insper são sincronizados com o Google Calendar</p>
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 bg-primary/20 text-primary rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <i data-lucide="settings" class="w-8 h-8"></i>
       </div>
-    </div>
-  </div>
-
-  <!-- Messages -->
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }} mb-6">
-        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5"></i>
-        <span>{{ message }}</span>
-      </div>
-    {% endfor %}
-  {% endif %}
-
-  <form method="post" class="space-y-6">
-    {% csrf_token %}
-    
-    <!-- Configurações Gerais -->
-    <div class="card bg-base-100 shadow-lg">
-      <div class="card-body">
-        <h2 class="card-title text-xl mb-4">
-          <i data-lucide="toggle-left" class="w-5 h-5"></i>
-          Configurações Gerais
-        </h2>
-        
-        <div class="space-y-4">
-          <!-- Sincronização Habilitada -->
-          <div class="form-control">
-            <label class="label cursor-pointer">
-              <span class="label-text font-medium">
-                <i data-lucide="power" class="w-4 h-4 inline mr-2"></i>
-                Habilitar Sincronização Automática
-              </span>
-              <input 
-                type="checkbox" 
-                name="sync_enabled" 
-                class="toggle toggle-primary"
-                {% if sync_config.sync_enabled %}checked{% endif %}
-              />
-            </label>
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Quando habilitado, seus eventos serão sincronizados automaticamente
-              </span>
-            </div>
-          </div>
-
-          <!-- Frequência de Sincronização -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">
-                <i data-lucide="clock" class="w-4 h-4 inline mr-2"></i>
-                Frequência de Sincronização (horas)
-              </span>
-            </label>
-            <select name="sync_frequency_hours" class="select select-bordered w-full max-w-xs">
-              <option value="1" {% if sync_config.sync_frequency_hours == 1 %}selected{% endif %}>A cada 1 hora</option>
-              <option value="2" {% if sync_config.sync_frequency_hours == 2 %}selected{% endif %}>A cada 2 horas</option>
-              <option value="4" {% if sync_config.sync_frequency_hours == 4 %}selected{% endif %}>A cada 4 horas</option>
-              <option value="6" {% if sync_config.sync_frequency_hours == 6 %}selected{% endif %}>A cada 6 horas</option>
-              <option value="12" {% if sync_config.sync_frequency_hours == 12 %}selected{% endif %}>A cada 12 horas</option>
-              <option value="24" {% if sync_config.sync_frequency_hours == 24 %}selected{% endif %}>Uma vez por dia</option>
-            </select>
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Com que frequência verificar novos eventos
-              </span>
-            </div>
-          </div>
-
-          <!-- Nome do Calendário -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">
-                <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
-                Nome do Calendário no Google
-              </span>
-            </label>
-            <input 
-              type="text" 
-              name="google_calendar_name" 
-              value="{{ sync_config.google_calendar_name }}"
-              placeholder="Insper Sync"
-              class="input input-bordered w-full max-w-md"
-              required
-            />
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Nome que aparecerá no seu Google Calendar
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <h1 class="text-3xl lg:text-4xl font-bold text-primary mb-4">
+        Configurações de Sincronização
+      </h1>
+      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
+        Personalize como seus eventos do Insper são sincronizados com o Google Calendar
+      </p>
     </div>
 
-    <!-- Formatação de Eventos -->
-    <div class="card bg-base-100 shadow-lg">
-      <div class="card-body">
-        <h2 class="card-title text-xl mb-4">
-          <i data-lucide="edit-3" class="w-5 h-5"></i>
-          Formatação de Eventos
-        </h2>
-        
-        <div class="space-y-4">
-          <!-- Prefixo Insper -->
-          <div class="form-control">
-            <label class="label cursor-pointer">
-              <span class="label-text font-medium">
-                <i data-lucide="tag" class="w-4 h-4 inline mr-2"></i>
-                Adicionar prefixo "[Insper]" aos eventos
-              </span>
-              <input 
-                type="checkbox" 
-                name="add_insper_prefix" 
-                class="toggle toggle-primary"
-                {% if sync_config.add_insper_prefix %}checked{% endif %}
-              />
-            </label>
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Exemplo: "[Insper] Aula de Matemática"
-              </span>
+    <form method="post" class="space-y-8">
+      {% csrf_token %}
+      
+      <!-- Configurações Gerais -->
+      <div class="card bg-base-100 shadow-xl border border-base-300/50">
+        <div class="card-body p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-primary/20 text-primary rounded-lg flex items-center justify-center">
+              <i data-lucide="toggle-left" class="w-5 h-5"></i>
             </div>
+            <h2 class="text-2xl font-bold text-primary">Configurações Gerais</h2>
           </div>
-
-          <!-- Professor na Descrição -->
-          <div class="form-control">
-            <label class="label cursor-pointer">
-              <span class="label-text font-medium">
-                <i data-lucide="user" class="w-4 h-4 inline mr-2"></i>
-                Incluir nome do professor na descrição
-              </span>
-              <input 
-                type="checkbox" 
-                name="include_teacher_in_description" 
-                class="toggle toggle-primary"
-                {% if sync_config.include_teacher_in_description %}checked{% endif %}
-              />
-            </label>
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Adiciona informações do professor no corpo do evento
-              </span>
-            </div>
-          </div>
-
-          <!-- Código da Disciplina -->
-          <div class="form-control">
-            <label class="label cursor-pointer">
-              <span class="label-text font-medium">
-                <i data-lucide="hash" class="w-4 h-4 inline mr-2"></i>
-                Incluir código da disciplina
-              </span>
-              <input 
-                type="checkbox" 
-                name="include_discipline_code" 
-                class="toggle toggle-primary"
-                {% if sync_config.include_discipline_code %}checked{% endif %}
-              />
-            </label>
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Adiciona o código da disciplina ao título ou descrição
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filtros -->
-    <div class="card bg-base-100 shadow-lg">
-      <div class="card-body">
-        <h2 class="card-title text-xl mb-4">
-          <i data-lucide="filter" class="w-5 h-5"></i>
-          Filtros de Sincronização
-        </h2>
-        
-        <div class="space-y-4">
-          <!-- Tipos de Evento Excluídos -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">
-                <i data-lucide="x-circle" class="w-4 h-4 inline mr-2"></i>
-                Tipos de eventos para excluir
-              </span>
-            </label>
-            <input 
-              type="text" 
-              name="excluded_event_types" 
-              value="{{ excluded_event_types_str }}"
-              placeholder="prova, trabalho, seminário"
-              class="input input-bordered w-full"
-            />
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Separe os tipos por vírgula. Eventos com estes tipos não serão sincronizados
-              </span>
-            </div>
-          </div>
-
-          <!-- Disciplinas Excluídas -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">
-                <i data-lucide="book-x" class="w-4 h-4 inline mr-2"></i>
-                Disciplinas para excluir
-              </span>
-            </label>
-            <input 
-              type="text" 
-              name="excluded_disciplines" 
-              value="{{ excluded_disciplines_str }}"
-              placeholder="Matemática, Física"
-              class="input input-bordered w-full"
-            />
-            <div class="label">
-              <span class="label-text-alt text-base-content/60">
-                Separe as disciplinas por vírgula. Eventos destas disciplinas não serão sincronizados
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Ações -->
-    <div class="card bg-base-100 shadow-lg">
-      <div class="card-body">
-        <div class="card-actions justify-between items-center">
-          <a href="{% url 'dashboard' %}" class="btn btn-ghost">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Voltar
-          </a>
           
-          <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary">
-              <i data-lucide="save" class="w-4 h-4"></i>
-              Salvar Configurações
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Sincronização Habilitada -->
+            <div class="space-y-4">
+              <div class="form-control">
+                <div class="flex items-center justify-between p-4 bg-base-200/50 rounded-lg border border-base-300/30">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center">
+                      <i data-lucide="power" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <span class="font-medium">Sincronização Automática</span>
+                      <p class="text-sm text-base-content/60">Habilitar ou desabilitar</p>
+                    </div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    name="sync_enabled" 
+                    class="toggle toggle-success toggle-lg"
+                    {% if sync_config.sync_enabled %}checked{% endif %}
+                  />
+                </div>
+                <div class="text-xs text-base-content/60 mt-2 pl-4">
+                  Quando habilitado, seus eventos serão sincronizados automaticamente
+                </div>
+              </div>
+
+              <!-- Nome do Calendário -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4 text-primary"></i>
+                    Nome do Calendário no Google
+                  </span>
+                </label>
+                <input 
+                  type="text" 
+                  name="google_calendar_name" 
+                  value="{{ sync_config.google_calendar_name }}"
+                  placeholder="Insper Sync"
+                  class="input input-bordered input-lg w-full focus:input-primary"
+                  required
+                />
+                <label class="label">
+                  <span class="label-text-alt text-base-content/60">
+                    Nome que aparecerá no seu Google Calendar
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Frequência de Sincronização -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-semibold flex items-center gap-2">
+                  <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
+                  Frequência de Sincronização
+                </span>
+              </label>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="cursor-pointer">
+                  <input type="radio" name="sync_frequency_hours" value="1" class="radio radio-primary" {% if sync_config.sync_frequency_hours == 1 %}checked{% endif %}>
+                  <span class="label-text ml-2">1 hora</span>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="sync_frequency_hours" value="2" class="radio radio-primary" {% if sync_config.sync_frequency_hours == 2 %}checked{% endif %}>
+                  <span class="label-text ml-2">2 horas</span>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="sync_frequency_hours" value="4" class="radio radio-primary" {% if sync_config.sync_frequency_hours == 4 %}checked{% endif %}>
+                  <span class="label-text ml-2">4 horas</span>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="sync_frequency_hours" value="6" class="radio radio-primary" {% if sync_config.sync_frequency_hours == 6 %}checked{% endif %}>
+                  <span class="label-text ml-2">6 horas</span>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="sync_frequency_hours" value="12" class="radio radio-primary" {% if sync_config.sync_frequency_hours == 12 %}checked{% endif %}>
+                  <span class="label-text ml-2">12 horas</span>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="sync_frequency_hours" value="24" class="radio radio-primary" {% if sync_config.sync_frequency_hours == 24 %}checked{% endif %}>
+                  <span class="label-text ml-2">24 horas</span>
+                </label>
+              </div>
+              <label class="label">
+                <span class="label-text-alt text-base-content/60">
+                  Com que frequência verificar novos eventos
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formatação de Eventos -->
+      <div class="card bg-base-100 shadow-xl border border-base-300/50">
+        <div class="card-body p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-secondary/20 text-secondary rounded-lg flex items-center justify-center">
+              <i data-lucide="edit-3" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Formatação de Eventos</h2>
+          </div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <!-- Prefixo Insper -->
+              <div class="form-control">
+                <div class="flex items-center justify-between p-4 bg-base-200/50 rounded-lg border border-base-300/30">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-accent/20 text-accent rounded-full flex items-center justify-center">
+                      <i data-lucide="tag" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <span class="font-medium">Prefixo "[Insper]"</span>
+                      <p class="text-sm text-base-content/60">Ex: "[Insper] Aula de Matemática"</p>
+                    </div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    name="add_insper_prefix" 
+                    class="toggle toggle-accent"
+                    {% if sync_config.add_insper_prefix %}checked{% endif %}
+                  />
+                </div>
+              </div>
+
+              <!-- Professor na Descrição -->
+              <div class="form-control">
+                <div class="flex items-center justify-between p-4 bg-base-200/50 rounded-lg border border-base-300/30">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-info/20 text-info rounded-full flex items-center justify-center">
+                      <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <span class="font-medium">Nome do Professor</span>
+                      <p class="text-sm text-base-content/60">Incluir na descrição</p>
+                    </div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    name="include_teacher_in_description" 
+                    class="toggle toggle-info"
+                    {% if sync_config.include_teacher_in_description %}checked{% endif %}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Código da Disciplina -->
+              <div class="form-control">
+                <div class="flex items-center justify-between p-4 bg-base-200/50 rounded-lg border border-base-300/30">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-warning/20 text-warning rounded-full flex items-center justify-center">
+                      <i data-lucide="hash" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <span class="font-medium">Código da Disciplina</span>
+                      <p class="text-sm text-base-content/60">Incluir código/turma</p>
+                    </div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    name="include_discipline_code" 
+                    class="toggle toggle-warning"
+                    {% if sync_config.include_discipline_code %}checked{% endif %}
+                  />
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div class="bg-neutral/5 border border-neutral/20 rounded-lg p-4">
+                <h4 class="font-medium text-sm mb-2 flex items-center gap-2">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                  Preview do Evento
+                </h4>
+                <div class="bg-base-100 p-3 rounded border border-base-300/50">
+                  <div class="font-medium text-sm" id="event-preview-title">
+                    [Insper] Aula de Cálculo I
+                  </div>
+                  <div class="text-xs text-base-content/60 mt-1" id="event-preview-desc">
+                    Disciplina: MAT101<br>
+                    Docente: Prof. João Silva<br>
+                    Turma: A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="card bg-base-100 shadow-xl border border-base-300/50">
+        <div class="card-body p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-warning/20 text-warning rounded-lg flex items-center justify-center">
+              <i data-lucide="filter" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-primary">Filtros de Sincronização</h2>
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Info sobre filtros -->
+            <div class="bg-info/10 border border-info/20 rounded-lg p-4">
+              <div class="flex items-center gap-2 text-info mb-2">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                <span class="font-semibold">Como usar os filtros</span>
+              </div>
+              <p class="text-sm text-base-content/80">
+                Use os filtros abaixo para excluir tipos específicos de eventos ou disciplinas da sincronização. Separe múltiplos itens por vírgula.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Tipos de Evento Excluídos -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold flex items-center gap-2">
+                    <i data-lucide="x-circle" class="w-4 h-4 text-error"></i>
+                    Tipos de eventos para excluir
+                  </span>
+                </label>
+                <textarea 
+                  name="excluded_event_types" 
+                  class="textarea textarea-bordered h-24 focus:textarea-primary"
+                  placeholder="prova, trabalho, seminário"
+                >{{ excluded_event_types_str }}</textarea>
+                <label class="label">
+                  <span class="label-text-alt text-base-content/60">
+                    Eventos com estes tipos não serão sincronizados
+                  </span>
+                </label>
+              </div>
+
+              <!-- Disciplinas Excluídas -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold flex items-center gap-2">
+                    <i data-lucide="book-x" class="w-4 h-4 text-error"></i>
+                    Disciplinas para excluir
+                  </span>
+                </label>
+                <textarea 
+                  name="excluded_disciplines" 
+                  class="textarea textarea-bordered h-24 focus:textarea-primary"
+                  placeholder="Matemática, Física, Química"
+                >{{ excluded_disciplines_str }}</textarea>
+                <label class="label">
+                  <span class="label-text-alt text-base-content/60">
+                    Eventos destas disciplinas não serão sincronizados
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card bg-base-100 shadow-xl border border-base-300/50">
+        <div class="card-body p-8">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              Voltar ao Dashboard
+            </a>
+            
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button type="button" class="btn btn-outline" onclick="resetForm()">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                Resetar
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Salvar Configurações
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Zona de Perigo -->
+    <div class="card bg-error/5 border border-error/20 shadow-xl mt-12">
+      <div class="card-body p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-error/20 text-error rounded-lg flex items-center justify-center">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-error">Zona de Perigo</h2>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="bg-warning/10 border border-warning/20 rounded-lg p-4">
+            <div class="flex items-center gap-2 text-warning mb-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span class="font-semibold">Atenção!</span>
+            </div>
+            <p class="text-sm text-base-content/80">
+              As ações abaixo são irreversíveis e podem afetar permanentemente seus dados de sincronização.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form method="post" action="{% url 'clear_sync_history' %}" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-warning btn-outline w-full" onclick="return confirm('Tem certeza que deseja limpar o histórico? Esta ação manterá apenas as 10 sessões mais recentes.')">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Limpar Histórico
+              </button>
+            </form>
+            
+            <button type="button" class="btn btn-error btn-outline w-full" onclick="reset_modal.showModal()">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              Resetar Todos os Dados
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-  </form>
-
-  <!-- Zona de Perigo -->
-  <div class="card bg-error/5 border border-error/20 shadow-lg mt-8">
-    <div class="card-body">
-      <h2 class="card-title text-error text-xl mb-4">
-        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-        Zona de Perigo
-      </h2>
-      
-      <div class="space-y-4">
-        <div class="alert alert-warning">
-          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-          <div>
-            <h3 class="font-bold">Atenção!</h3>
-            <div class="text-sm">As ações abaixo são irreversíveis e podem afetar seus dados de sincronização.</div>
-          </div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-4">
-          <a href="{% url 'clear_sync_history' %}" class="btn btn-warning btn-outline">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-            Limpar Histórico
-          </a>
-          
-          <button type="button" class="btn btn-error btn-outline" onclick="reset_modal.showModal()">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            Resetar Todos os Dados
-          </button>
         </div>
       </div>
     </div>
@@ -300,30 +367,52 @@
 
 <!-- Modal de Confirmação de Reset -->
 <dialog id="reset_modal" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg text-error">Confirmar Reset Completo</h3>
-    <div class="py-4">
-      <div class="alert alert-error mb-4">
+  <div class="modal-box max-w-lg">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 bg-error/20 text-error rounded-full flex items-center justify-center">
         <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-        <div>
-          <div class="font-bold">Esta ação é irreversível!</div>
-          <div class="text-sm">Todos os seus dados de sincronização serão removidos permanentemente.</div>
+      </div>
+      <h3 class="font-bold text-lg text-error">Confirmar Reset Completo</h3>
+    </div>
+    
+    <div class="space-y-4">
+      <div class="bg-error/10 border border-error/20 rounded-lg p-4">
+        <div class="flex items-center gap-2 text-error mb-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span class="font-bold">Esta ação é irreversível!</span>
+        </div>
+        <p class="text-sm text-base-content/80">
+          Todos os seus dados de sincronização serão removidos permanentemente.
+        </p>
+      </div>
+      
+      <div>
+        <p class="mb-3 font-medium">Isso incluirá:</p>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar" class="w-3 h-3 text-error"></i>
+            <span>Eventos sincronizados</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="history" class="w-3 h-3 text-error"></i>
+            <span>Histórico de sincronizações</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="link" class="w-3 h-3 text-error"></i>
+            <span>Mapeamentos de eventos</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="clock" class="w-3 h-3 text-error"></i>
+            <span>Data da última sync</span>
+          </div>
         </div>
       </div>
       
-      <p class="mb-4">Isso incluirá:</p>
-      <ul class="list-disc list-inside space-y-1 text-sm mb-4">
-        <li>Todos os eventos sincronizados</li>
-        <li>Histórico de sincronizações</li>
-        <li>Mapeamentos de eventos</li>
-        <li>Data da última sincronização</li>
-      </ul>
-      
       <form method="post" action="{% url 'reset_sync_data' %}">
         {% csrf_token %}
-        <div class="form-control mb-4">
+        <div class="form-control">
           <label class="label">
-            <span class="label-text">Digite "RESET" para confirmar:</span>
+            <span class="label-text font-medium">Digite "RESET" para confirmar:</span>
           </label>
           <input 
             type="text" 
@@ -335,7 +424,7 @@
         </div>
         
         <div class="modal-action">
-          <button type="button" class="btn btn-ghost" onclick="reset_modal.close()">Cancelar</button>
+          <button type="button" class="btn btn-outline" onclick="reset_modal.close()">Cancelar</button>
           <button type="submit" class="btn btn-error">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
             Resetar Dados
@@ -351,6 +440,53 @@
 
 <script>
   // Initialize Lucide icons
-  lucide.createIcons();
+  document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+    updatePreview();
+    
+    // Listen for changes in formatting options
+    document.querySelectorAll('input[name="add_insper_prefix"], input[name="include_teacher_in_description"], input[name="include_discipline_code"]').forEach(input => {
+      input.addEventListener('change', updatePreview);
+    });
+  });
+
+  function updatePreview() {
+    const addPrefix = document.querySelector('input[name="add_insper_prefix"]').checked;
+    const includeTeacher = document.querySelector('input[name="include_teacher_in_description"]').checked;
+    const includeDiscipline = document.querySelector('input[name="include_discipline_code"]').checked;
+    
+    let title = "Aula de Cálculo I";
+    if (addPrefix) {
+      title = "[Insper] " + title;
+    }
+    
+    let description = [];
+    if (includeDiscipline) {
+      description.push("Disciplina: MAT101");
+    }
+    if (includeTeacher) {
+      description.push("Docente: Prof. João Silva");
+    }
+    description.push("Turma: A");
+    
+    document.getElementById('event-preview-title').textContent = title;
+    document.getElementById('event-preview-desc').innerHTML = description.join('<br>');
+  }
+
+  function resetForm() {
+    if (confirm('Tem certeza que deseja resetar todas as configurações para os valores padrão?')) {
+      // Reset to default values
+      document.querySelector('input[name="sync_enabled"]').checked = true;
+      document.querySelector('input[name="sync_frequency_hours"][value="6"]').checked = true;
+      document.querySelector('input[name="google_calendar_name"]').value = "Insper Sync";
+      document.querySelector('input[name="add_insper_prefix"]').checked = true;
+      document.querySelector('input[name="include_teacher_in_description"]').checked = true;
+      document.querySelector('input[name="include_discipline_code"]').checked = true;
+      document.querySelector('textarea[name="excluded_event_types"]').value = "";
+      document.querySelector('textarea[name="excluded_disciplines"]').value = "";
+
+      updatePreview();
+    }
+  }
 </script>
 {% endblock %}

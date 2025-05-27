@@ -7,72 +7,81 @@
   .sync-status-indicator {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+  
+  .stat-hover:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-8">
+<div class="min-h-screen bg-gradient-to-br from-base-200/30 to-base-300/30 py-6">
   <div class="container mx-auto px-4">
+    
+    <!-- Breadcrumb -->
+    <div class="breadcrumbs text-sm mb-6 max-w-7xl mx-auto">
+      <ul>
+        <li class="text-base-content/60">Dashboard</li>
+      </ul>
+    </div>
+
     <!-- Header -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold flex items-center gap-3">
-          <div class="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center">
-            <i data-lucide="calendar" class="w-6 h-6 text-primary"></i>
-          </div>
-          Dashboard
-        </h1>
-        <p class="text-base-content/70 mt-2">
-          Bem-vindo(a), {{ user.name }}! Gerencie suas sincronizações de calendário.
-        </p>
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 max-w-7xl mx-auto">
+      <div class="flex items-center gap-4 mb-4 lg:mb-0">
+        <div class="w-12 h-12 bg-primary/20 text-primary rounded-xl flex items-center justify-center shadow-lg">
+          <i data-lucide="calendar" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-base-content">
+            Olá, {{ user.name|default:user.email|cut:"@al.insper.edu.br"|cut:"@insper.edu.br" }}! 👋
+          </h1>
+          <p class="text-base-content/70 text-sm lg:text-base">
+            Gerencie suas sincronizações de calendário
+          </p>
+        </div>
       </div>
 
-      <div class="mt-4 lg:mt-0 flex gap-2">
+      <div class="flex flex-col sm:flex-row gap-3">
         <!-- Sincronização Manual -->
         {% if sync_stats.can_sync %}
           <form method="post" action="{% url 'manual_sync' %}" id="manual-sync-form" class="inline">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" id="sync-btn">
               <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-              <span id="sync-btn-text">Sincronizar Agora</span>
+              <span id="sync-btn-text" class="hidden sm:inline">Sincronizar Agora</span>
             </button>
           </form>
         {% else %}
           <button class="btn btn-primary btn-disabled" disabled title="Complete a configuração para habilitar">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            Sincronizar Agora
+            <span class="hidden sm:inline">Sincronizar Agora</span>
           </button>
         {% endif %}
 
         <!-- Menu de Configurações -->
         <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost">
+          <div tabindex="0" role="button" class="btn btn-outline">
             <i data-lucide="settings" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Configurações</span>
           </div>
-          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-64 p-2 shadow">
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-64 p-2 shadow-lg border border-base-300">
             <li>
-              <a href="{% url 'sync_configuration' %}">
+              <a href="{% url 'sync_configuration' %}" class="flex items-center gap-3 p-3">
                 <i data-lucide="sliders" class="w-4 h-4"></i>
                 Configurações de Sync
               </a>
             </li>
             <li>
-              <a href="{% url 'sync_history' %}">
+              <a href="{% url 'sync_history' %}" class="flex items-center gap-3 p-3">
                 <i data-lucide="history" class="w-4 h-4"></i>
                 Histórico
               </a>
             </li>
             <li>
-              <a href="{% url 'setup_credentials' %}">
+              <a href="{% url 'setup_credentials' %}" class="flex items-center gap-3 p-3">
                 <i data-lucide="key" class="w-4 h-4"></i>
                 Credenciais
-              </a>
-            </li>
-            <li><hr class="my-1"></li>
-            <li>
-              <a href="#" onclick="document.getElementById('logout-form').submit();">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-                Sair
               </a>
             </li>
           </ul>
@@ -81,151 +90,194 @@
     </div>
 
     <!-- Status da Sincronização (se houver em andamento) -->
-    <div id="sync-status-alert" class="hidden mb-6">
-      <div class="alert alert-info">
-        <div class="sync-status-indicator">
-          <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
-        </div>
-        <div>
-          <h3 class="font-bold">Sincronização em Andamento</h3>
-          <div class="text-sm" id="sync-status-text">
-            Processando eventos do calendário...
+    <div id="sync-status-alert" class="hidden mb-6 max-w-7xl mx-auto">
+      <div class="bg-info/10 border border-info/20 rounded-lg p-4">
+        <div class="flex items-center gap-3">
+          <div class="sync-status-indicator">
+            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-info"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-info">Sincronização em Andamento</h3>
+            <div class="text-sm text-base-content/70" id="sync-status-text">
+              Processando eventos do calendário...
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 max-w-7xl mx-auto">
       <!-- Google Calendar Status -->
-      <div class="stats bg-base-100 shadow">
-        <div class="stat">
-          <div class="stat-figure {% if user.google_connected %}text-success{% else %}text-warning{% endif %}">
-            <i data-lucide="calendar-check" class="w-8 h-8"></i>
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-6 stat-hover border border-base-300/50">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 {% if user.google_connected %}bg-success/20 text-success{% else %}bg-warning/20 text-warning{% endif %} rounded-lg flex items-center justify-center">
+            <i data-lucide="calendar-check" class="w-6 h-6"></i>
           </div>
-          <div class="stat-title">Google Calendar</div>
-          <div class="stat-value {% if user.google_connected %}text-success{% else %}text-warning{% endif %}">
-            {% if user.google_connected %}
-              <i data-lucide="check-circle" class="w-8 h-8"></i>
+          {% if user.google_connected %}
+            {% if google_status.token_expired %}
+              <div class="badge badge-warning badge-sm">Token expirado</div>
             {% else %}
-              <i data-lucide="alert-circle" class="w-8 h-8"></i>
+              <div class="badge badge-success badge-sm">Conectado</div>
             {% endif %}
-          </div>
-          <div class="stat-desc">
-            {% if user.google_connected %}
-              {% if google_status.token_expired %}
-                <span class="text-warning">Token expirado</span>
-              {% else %}
-                Conectado e pronto
-              {% endif %}
+          {% else %}
+            <div class="badge badge-warning badge-sm">Desconectado</div>
+          {% endif %}
+        </div>
+        <div class="stat-title text-base-content/60 text-sm">Google Calendar</div>
+        <div class="stat-value text-lg font-bold">
+          {% if user.google_connected %}
+            {% if google_status.token_expired %}
+              <span class="text-warning">Reconectar</span>
             {% else %}
-              Aguardando conexão
+              <span class="text-success">Pronto</span>
             {% endif %}
-          </div>
+          {% else %}
+            <span class="text-warning">Configurar</span>
+          {% endif %}
+        </div>
+        <div class="stat-desc text-xs">
+          {% if user.google_connected %}
+            {% if google_status.token_expired %}
+              Reautorização necessária
+            {% else %}
+              Insper Sync
+            {% endif %}
+          {% else %}
+            Aguardando conexão
+          {% endif %}
         </div>
       </div>
 
       <!-- Última Sincronização -->
-      <div class="stats bg-base-100 shadow">
-        <div class="stat">
-          <div class="stat-figure text-secondary">
-            <i data-lucide="clock" class="w-8 h-8"></i>
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-6 stat-hover border border-base-300/50">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-secondary/20 text-secondary rounded-lg flex items-center justify-center">
+            <i data-lucide="clock" class="w-6 h-6"></i>
           </div>
-          <div class="stat-title">Última Sincronização</div>
-          <div class="stat-value text-secondary" id="last-sync-value">
-            {% if user.last_sync %}
-              {{ user.last_sync|date:"d/m" }}
-            {% else %}
-              --
-            {% endif %}
-          </div>
-          <div class="stat-desc" id="last-sync-desc">
-            {% if user.last_sync %}
-              {{ user.last_sync|timesince }} atrás
-            {% else %}
-              Nunca sincronizado
-            {% endif %}
-          </div>
+          {% if user.last_sync %}
+            <div class="badge badge-secondary badge-sm">Recente</div>
+          {% else %}
+            <div class="badge badge-neutral badge-sm">Nunca</div>
+          {% endif %}
+        </div>
+        <div class="stat-title text-base-content/60 text-sm">Última Sincronização</div>
+        <div class="stat-value text-lg font-bold text-secondary" id="last-sync-value">
+          {% if user.last_sync %}
+            {{ user.last_sync|date:"d/m" }}
+          {% else %}
+            --
+          {% endif %}
+        </div>
+        <div class="stat-desc text-xs" id="last-sync-desc">
+          {% if user.last_sync %}
+            {{ user.last_sync|timesince }} atrás
+          {% else %}
+            Nunca sincronizado
+          {% endif %}
         </div>
       </div>
 
       <!-- Credenciais Insper -->
-      <div class="stats bg-base-100 shadow">
-        <div class="stat">
-          <div class="stat-figure {% if user.credentials_configured %}text-primary{% else %}text-warning{% endif %}">
-            <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-6 stat-hover border border-base-300/50">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 {% if user.credentials_configured %}bg-primary/20 text-primary{% else %}bg-warning/20 text-warning{% endif %} rounded-lg flex items-center justify-center">
+            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
           </div>
-          <div class="stat-title">Credenciais Insper</div>
-          <div class="stat-value {% if user.credentials_configured %}text-primary{% else %}text-warning{% endif %}">
-            {% if user.credentials_configured %}
-              <i data-lucide="check-circle" class="w-8 h-8"></i>
-            {% else %}
-              <i data-lucide="alert-circle" class="w-8 h-8"></i>
-            {% endif %}
-          </div>
-          <div class="stat-desc">
-            {% if user.credentials_configured %}
-              Configuradas
-            {% else %}
-              Pendente configuração
-            {% endif %}
-          </div>
+          {% if user.credentials_configured %}
+            <div class="badge badge-primary badge-sm">Configurado</div>
+          {% else %}
+            <div class="badge badge-warning badge-sm">Pendente</div>
+          {% endif %}
+        </div>
+        <div class="stat-title text-base-content/60 text-sm">Credenciais Insper</div>
+        <div class="stat-value text-lg font-bold">
+          {% if user.credentials_configured %}
+            <span class="text-primary">Ativo</span>
+          {% else %}
+            <span class="text-warning">Configurar</span>
+          {% endif %}
+        </div>
+        <div class="stat-desc text-xs">
+          {% if user.credentials_configured %}
+            {{ user.insper_username }}
+          {% else %}
+            Pendente configuração
+          {% endif %}
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+      
       <!-- Configuração de Calendários -->
       <div class="lg:col-span-2">
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">
+        <div class="card bg-base-100 shadow-xl border border-base-300/50">
+          <div class="card-body p-6">
+            <h2 class="card-title text-xl mb-6">
               <i data-lucide="calendar-days" class="w-5 h-5"></i>
               Status da Sincronização
             </h2>
 
             <!-- Status Geral -->
             {% if sync_stats.can_sync %}
-              <div class="alert alert-success">
-                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                <div>
-                  <h3 class="font-bold">Sistema Pronto para Sincronização</h3>
-                  <div class="text-sm">
-                    Todas as configurações estão completas. Seus eventos serão sincronizados automaticamente.
+              <div class="bg-success/10 border border-success/20 rounded-lg p-4 mb-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-success/20 text-success rounded-full flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-success">Sistema Pronto para Sincronização</h3>
+                    <div class="text-sm text-base-content/70">
+                      Todas as configurações estão completas. Seus eventos serão sincronizados automaticamente.
+                    </div>
                   </div>
                 </div>
               </div>
             {% else %}
-              <div class="alert alert-info">
-                <i data-lucide="info" class="w-5 h-5"></i>
-                <div>
-                  <h3 class="font-bold">Configuração Pendente</h3>
-                  <div class="text-sm">
-                    Complete as configurações abaixo para habilitar a sincronização:
-                    <ul class="list-disc list-inside mt-2">
+              <div class="bg-info/10 border border-info/20 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 bg-info/20 text-info rounded-full flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-info">Configuração Pendente</h3>
+                    <div class="text-sm text-base-content/70 mb-3">
+                      Complete as configurações abaixo para habilitar a sincronização:
+                    </div>
+                    <div class="space-y-2">
                       {% if not account_status.email_verified %}
-                        <li>Verificar email</li>
+                        <div class="flex items-center gap-2 text-sm">
+                          <i data-lucide="circle" class="w-3 h-3 text-warning"></i>
+                          <span>Verificar email</span>
+                        </div>
                       {% endif %}
                       {% if not account_status.credentials_configured %}
-                        <li>Configurar credenciais do Insper</li>
+                        <div class="flex items-center gap-2 text-sm">
+                          <i data-lucide="circle" class="w-3 h-3 text-warning"></i>
+                          <span>Configurar credenciais do Insper</span>
+                        </div>
                       {% endif %}
                       {% if not user.google_connected %}
-                        <li>Conectar Google Calendar</li>
+                        <div class="flex items-center gap-2 text-sm">
+                          <i data-lucide="circle" class="w-3 h-3 text-warning"></i>
+                          <span>Conectar Google Calendar</span>
+                        </div>
                       {% endif %}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               </div>
             {% endif %}
 
             <!-- Configurações de Calendário -->
-            <div class="space-y-4 mt-6">
+            <div class="space-y-4">
               <!-- Google Calendar -->
-              <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-                <div class="flex items-center gap-3">
-                  <div class="bg-red-500/10 rounded-full w-8 h-8 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-base-200/50 rounded-lg border border-base-300/30">
+                <div class="flex items-center gap-3 mb-3 sm:mb-0">
+                  <div class="w-10 h-10 bg-red-500/20 text-red-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
                     </svg>
                   </div>
@@ -236,7 +288,7 @@
                         {% if google_status.token_expired %}
                           <span class="text-warning">Token expirado - Reconecte sua conta</span>
                         {% else %}
-                          Conectado - Calendário: {{ user.google_calendar_id|default:"Insper Sync" }}
+                          Conectado - Insper Sync
                         {% endif %}
                       {% else %}
                         Conecte para sincronizar seus eventos
@@ -244,40 +296,40 @@
                     </p>
                   </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                   {% if user.google_connected %}
                     {% if google_status.token_expired %}
-                      <a href="{% url 'google_auth' %}" class="btn btn-sm btn-warning">
+                      <a href="{% url 'google_auth' %}" class="btn btn-warning btn-sm">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        Reconectar
+                        <span class="hidden sm:inline">Reconectar</span>
                       </a>
                     {% else %}
-                      <a href="{% url 'test_google_connection' %}" class="btn btn-sm btn-outline">
+                      <a href="{% url 'test_google_connection' %}" class="btn btn-outline btn-sm">
                         <i data-lucide="test-tube" class="w-4 h-4"></i>
-                        Testar
+                        <span class="hidden sm:inline">Testar</span>
                       </a>
                     {% endif %}
                     <form method="post" action="{% url 'google_disconnect' %}" class="inline">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-sm btn-error btn-outline" onclick="return confirm('Deseja realmente desconectar o Google Calendar?')">
+                      <button type="submit" class="btn btn-error btn-outline btn-sm" onclick="return confirm('Deseja realmente desconectar o Google Calendar?')">
                         <i data-lucide="unlink" class="w-4 h-4"></i>
-                        Desconectar
+                        <span class="hidden sm:inline">Desconectar</span>
                       </button>
                     </form>
                   {% else %}
-                    <a href="{% url 'google_auth' %}" class="btn btn-sm btn-primary">
+                    <a href="{% url 'google_auth' %}" class="btn btn-primary btn-sm">
                       <i data-lucide="link" class="w-4 h-4"></i>
-                      Conectar
+                      <span class="hidden sm:inline">Conectar</span>
                     </a>
                   {% endif %}
                 </div>
               </div>
 
               <!-- Calendário Acadêmico Insper -->
-              <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-                <div class="flex items-center gap-3">
-                  <div class="bg-primary/10 rounded-full w-8 h-8 flex items-center justify-center">
-                    <i data-lucide="graduation-cap" class="w-4 h-4 text-primary"></i>
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-base-200/50 rounded-lg border border-base-300/30">
+                <div class="flex items-center gap-3 mb-3 sm:mb-0">
+                  <div class="w-10 h-10 bg-primary/20 text-primary rounded-lg flex items-center justify-center">
+                    <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                   </div>
                   <div>
                     <h3 class="font-medium">Calendário Acadêmico Insper</h3>
@@ -304,15 +356,18 @@
 
             <!-- Sincronização Manual Avançada -->
             {% if sync_stats.can_sync %}
-              <div class="mt-6 p-4 bg-base-200/50 rounded-lg">
-                <h4 class="font-medium mb-3">Sincronização Personalizada</h4>
+              <div class="mt-6 p-4 bg-base-200/30 rounded-lg border border-base-300/30">
+                <h4 class="font-medium mb-3 flex items-center gap-2">
+                  <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                  Sincronização Personalizada
+                </h4>
                 <form method="post" action="{% url 'manual_sync' %}" class="flex flex-col sm:flex-row gap-3">
                   {% csrf_token %}
-                  <input type="date" name="start_date" class="input input-bordered input-sm" placeholder="Data inicial">
-                  <input type="date" name="end_date" class="input input-bordered input-sm" placeholder="Data final">
+                  <input type="date" name="start_date" class="input input-bordered input-sm flex-1" placeholder="Data inicial">
+                  <input type="date" name="end_date" class="input input-bordered input-sm flex-1" placeholder="Data final">
                   <button type="submit" class="btn btn-outline btn-sm">
-                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
-                    Sincronizar Período
+                    <i data-lucide="play" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Sincronizar</span>
                   </button>
                 </form>
                 <p class="text-xs text-base-content/60 mt-2">
@@ -327,88 +382,90 @@
       <!-- Sidebar -->
       <div class="space-y-6">
         <!-- Ações Rápidas -->
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">
+        <div class="card bg-base-100 shadow-xl border border-base-300/50">
+          <div class="card-body p-6">
+            <h2 class="card-title text-lg mb-4">
               <i data-lucide="zap" class="w-5 h-5"></i>
               Ações Rápidas
             </h2>
 
             <div class="space-y-3">
-              <a href="{% url 'sync_configuration' %}" class="btn btn-outline w-full">
+              <a href="{% url 'sync_configuration' %}" class="btn btn-outline w-full justify-start">
                 <i data-lucide="settings" class="w-4 h-4"></i>
                 Configurar Sincronização
               </a>
 
-              <a href="{% url 'sync_history' %}" class="btn btn-outline w-full">
+              <a href="{% url 'sync_history' %}" class="btn btn-outline w-full justify-start">
                 <i data-lucide="history" class="w-4 h-4"></i>
                 Ver Histórico
               </a>
-
-              {% if sync_stats.can_sync %}
-                <button onclick="checkSyncStatus()" class="btn btn-outline w-full">
-                  <i data-lucide="activity" class="w-4 h-4"></i>
-                  Verificar Status
-                </button>
-              {% endif %}
             </div>
           </div>
         </div>
 
         <!-- Informações da Conta -->
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">
+        <div class="card bg-base-100 shadow-xl border border-base-300/50">
+          <div class="card-body p-6">
+            <h2 class="card-title text-lg mb-4">
               <i data-lucide="user" class="w-5 h-5"></i>
               Sua Conta
             </h2>
 
-            <div class="space-y-3">
-              <div class="flex items-center gap-2 text-sm">
-                <i data-lucide="mail" class="w-4 h-4 text-primary"></i>
-                <span class="text-base-content/70 break-all">{{ user.email }}</span>
+            <div class="space-y-4">
+              <!-- User Info -->
+              <div class="flex items-center gap-3 p-3 bg-base-200/50 rounded-lg">
+                <div class="w-10 h-10 bg-primary text-primary-content rounded-full flex items-center justify-center text-sm font-semibold">
+                  {{ user.email.0|upper }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-sm truncate">{{ user.name|default:user.email|cut:"@al.insper.edu.br"|cut:"@insper.edu.br" }}</p>
+                  <p class="text-xs text-base-content/60 truncate">{{ user.email }}</p>
+                </div>
               </div>
 
-              <div class="flex items-center gap-2 text-sm">
-                <i data-lucide="shield-check" class="w-4 h-4 text-success"></i>
-                <span class="text-base-content/70">Email verificado</span>
+              <!-- Status List -->
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 text-sm">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-success"></i>
+                  <span class="text-base-content/70">Email verificado</span>
+                </div>
+
+                {% if user.credentials_configured %}
+                  <div class="flex items-center gap-2 text-sm">
+                    <i data-lucide="key" class="w-4 h-4 text-success"></i>
+                    <span class="text-base-content/70">Credenciais configuradas</span>
+                  </div>
+                {% endif %}
+
+                {% if user.google_connected %}
+                  <div class="flex items-center gap-2 text-sm">
+                    <i data-lucide="calendar" class="w-4 h-4 {% if google_status.token_expired %}text-warning{% else %}text-success{% endif %}"></i>
+                    <span class="text-base-content/70">
+                      Google Calendar
+                      {% if google_status.token_expired %}
+                        (Token expirado)
+                      {% else %}
+                        conectado
+                      {% endif %}
+                    </span>
+                  </div>
+                {% endif %}
+
+                {% if sync_stats.can_sync %}
+                  <div class="flex items-center gap-2 text-sm">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>
+                    <span class="text-base-content/70">Pronto para sincronizar</span>
+                  </div>
+                {% endif %}
               </div>
-
-              {% if user.credentials_configured %}
-                <div class="flex items-center gap-2 text-sm">
-                  <i data-lucide="key" class="w-4 h-4 text-success"></i>
-                  <span class="text-base-content/70">Credenciais configuradas</span>
-                </div>
-              {% endif %}
-
-              {% if user.google_connected %}
-                <div class="flex items-center gap-2 text-sm">
-                  <i data-lucide="calendar" class="w-4 h-4 {% if google_status.token_expired %}text-warning{% else %}text-success{% endif %}"></i>
-                  <span class="text-base-content/70">
-                    Google Calendar
-                    {% if google_status.token_expired %}
-                      (Token expirado)
-                    {% else %}
-                      conectado
-                    {% endif %}
-                  </span>
-                </div>
-              {% endif %}
-
-              {% if sync_stats.can_sync %}
-                <div class="flex items-center gap-2 text-sm">
-                  <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>
-                  <span class="text-base-content/70">Pronto para sincronizar</span>
-                </div>
-              {% endif %}
             </div>
           </div>
         </div>
 
         <!-- Estatísticas Recentes -->
-        <div class="card bg-base-100 shadow-xl" id="recent-stats">
-          <div class="card-body">
-            <h2 class="card-title">
+        <div class="card bg-base-100 shadow-xl border border-base-300/50" id="recent-stats">
+          <div class="card-body p-6">
+            <h2 class="card-title text-lg mb-4">
               <i data-lucide="trending-up" class="w-5 h-5"></i>
               Última Sincronização
             </h2>
@@ -422,6 +479,9 @@
                   <div class="text-sm text-base-content/70">
                     {{ user.last_sync|date:"H:i" }} - {{ user.last_sync|timesince }} atrás
                   </div>
+                  <div class="mt-3 text-xs text-base-content/60">
+                    Próxima sincronização em algumas horas
+                  </div>
                 </div>
               {% else %}
                 <div class="text-center py-4">
@@ -429,6 +489,11 @@
                   <div class="text-sm text-base-content/70">
                     Nenhuma sincronização realizada ainda
                   </div>
+                  {% if sync_stats.can_sync %}
+                    <div class="text-xs text-base-content/60 mt-2">
+                      Clique em "Sincronizar Agora" para começar
+                    </div>
+                  {% endif %}
                 </div>
               {% endif %}
             </div>
@@ -481,10 +546,15 @@
     // Atualiza estatísticas de última sincronização
     if (data.last_sync) {
       const lastSyncDate = new Date(data.last_sync);
-      document.getElementById('last-sync-value').textContent = 
-        lastSyncDate.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
-      document.getElementById('last-sync-desc').textContent = 
-        'Há ' + getTimeAgo(lastSyncDate);
+      const lastSyncValue = document.getElementById('last-sync-value');
+      const lastSyncDesc = document.getElementById('last-sync-desc');
+      
+      if (lastSyncValue) {
+        lastSyncValue.textContent = lastSyncDate.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+      }
+      if (lastSyncDesc) {
+        lastSyncDesc.textContent = 'Há ' + getTimeAgo(lastSyncDate);
+      }
     }
     
     // Se há task em execução
@@ -514,9 +584,9 @@
       // Se acabou de concluir uma task
       if (data.task_status && data.task_status.ready) {
         if (data.task_status.successful) {
-          showNotification('Sincronização concluída com sucesso!', 'success');
+          showToast('Sincronização concluída com sucesso!', 'success');
         } else {
-          showNotification('Erro na sincronização: ' + data.task_status.result, 'error');
+          showToast('Erro na sincronização: ' + data.task_status.result, 'error');
         }
       }
     }
@@ -537,9 +607,9 @@
     }
   }
 
-  // Função para mostrar notificações
-  function showNotification(message, type = 'info') {
-    // Remove notificações existentes
+  // Função para mostrar toasts
+  function showToast(message, type = 'info') {
+    // Remove toasts existentes
     const existingToasts = document.querySelectorAll('.toast .alert');
     existingToasts.forEach(toast => toast.remove());
     
@@ -550,9 +620,9 @@
                      type === 'error' ? 'x-circle' : 'info';
     
     const alertHtml = `
-      <div class="alert ${alertClass}">
+      <div class="alert ${alertClass} shadow-lg max-w-sm">
         <i data-lucide="${iconClass}" class="w-5 h-5"></i>
-        <span>${message}</span>
+        <span class="text-sm">${message}</span>
       </div>
     `;
     
@@ -584,13 +654,14 @@
   document.addEventListener('DOMContentLoaded', function() {
     // Verifica status inicial
     checkSyncStatus();
+    
     // Intercepta submissão do formulário de sincronização
     const manualSyncForm = document.getElementById('manual-sync-form');
     if (manualSyncForm) {
       manualSyncForm.addEventListener('submit', function(e) {
         if (syncInProgress) {
           e.preventDefault();
-          showNotification('Aguarde a sincronização atual terminar', 'warning');
+          showToast('Aguarde a sincronização atual terminar', 'warning');
           return;
         }
 

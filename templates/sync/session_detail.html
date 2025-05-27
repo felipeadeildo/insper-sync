@@ -3,253 +3,404 @@
 {% block title %}Detalhes da Sincronização #{{ session.id }} - Insper Sync{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-6xl">
-  <!-- Header -->
-  <div class="mb-8">
-    <div class="breadcrumbs text-sm">
+<div class="min-h-screen bg-gradient-to-br from-base-200/30 to-base-300/30 py-8">
+  <div class="container mx-auto px-4 max-w-7xl">
+    
+    <!-- Breadcrumb -->
+    <div class="breadcrumbs text-sm mb-6">
       <ul>
         <li><a href="{% url 'dashboard' %}" class="link link-hover">Dashboard</a></li>
         <li><a href="{% url 'sync_history' %}" class="link link-hover">Histórico</a></li>
-        <li>Sincronização #{{ session.id }}</li>
+        <li class="text-base-content/60">Sincronização #{{ session.id }}</li>
       </ul>
     </div>
     
-    <div class="flex items-center gap-3 mt-4">
-      <div class="avatar">
-        <div class="w-12 h-12 rounded-full flex items-center justify-center
-          {% if session.status == 'completed' %}bg-success/20 text-success
-          {% elif session.status == 'failed' %}bg-error/20 text-error
-          {% elif session.status == 'running' %}bg-warning/20 text-warning
-          {% else %}bg-base-200 text-base-content{% endif %}">
-          {% if session.status == 'completed' %}
-            <i data-lucide="check-circle" class="w-6 h-6"></i>
-          {% elif session.status == 'failed' %}
-            <i data-lucide="x-circle" class="w-6 h-6"></i>
-          {% elif session.status == 'running' %}
-            <i data-lucide="loader" class="w-6 h-6 animate-spin"></i>
-          {% else %}
-            <i data-lucide="clock" class="w-6 h-6"></i>
-          {% endif %}
-        </div>
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
+      <div class="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg
+        {% if session.status == 'completed' %}bg-success/20 text-success
+        {% elif session.status == 'failed' %}bg-error/20 text-error
+        {% elif session.status == 'running' %}bg-warning/20 text-warning
+        {% else %}bg-base-200 text-base-content{% endif %}">
+        {% if session.status == 'completed' %}
+          <i data-lucide="check-circle" class="w-8 h-8"></i>
+        {% elif session.status == 'failed' %}
+          <i data-lucide="x-circle" class="w-8 h-8"></i>
+        {% elif session.status == 'running' %}
+          <i data-lucide="loader" class="w-8 h-8 animate-spin"></i>
+        {% else %}
+          <i data-lucide="clock" class="w-8 h-8"></i>
+        {% endif %}
       </div>
-      <div>
-        <h1 class="text-3xl font-bold text-base-content">
-          Sincronização #{{ session.id }}
-          <span class="badge badge-lg 
+      
+      <div class="flex-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+          <h1 class="text-2xl lg:text-3xl font-bold text-base-content">
+            Sincronização #{{ session.id }}
+          </h1>
+          <div class="badge badge-lg 
             {% if session.status == 'completed' %}badge-success
             {% elif session.status == 'failed' %}badge-error  
             {% elif session.status == 'running' %}badge-warning
-            {% else %}badge-neutral{% endif %} ml-2">
+            {% else %}badge-neutral{% endif %}">
             {% if session.status == 'completed' %}Concluída
             {% elif session.status == 'failed' %}Falhou
             {% elif session.status == 'running' %}Em Execução
             {% else %}{{ session.status|title }}{% endif %}
-          </span>
-        </h1>
-        <p class="text-base-content/70 mt-1">
-          Iniciada em {{ session.started_at|date:"d/m/Y H:i:s" }}
-          {% if session.completed_at %}
-            • Concluída em {{ session.completed_at|date:"d/m/Y H:i:s" }}
-            • Duração: {{ duration }}
-          {% endif %}
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Resumo da Sessão -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="stat bg-base-100 shadow-lg rounded-lg">
-      <div class="stat-figure text-success">
-        <i data-lucide="plus-circle" class="w-8 h-8"></i>
-      </div>
-      <div class="stat-title">Eventos Criados</div>
-      <div class="stat-value text-success">{{ session.events_created }}</div>
-      <div class="stat-desc">Novos eventos adicionados</div>
-    </div>
-
-    <div class="stat bg-base-100 shadow-lg rounded-lg">
-      <div class="stat-figure text-info">
-        <i data-lucide="edit" class="w-8 h-8"></i>
-      </div>
-      <div class="stat-title">Eventos Atualizados</div>
-      <div class="stat-value text-info">{{ session.events_updated }}</div>
-      <div class="stat-desc">Eventos modificados</div>
-    </div>
-
-    <div class="stat bg-base-100 shadow-lg rounded-lg">
-      <div class="stat-figure text-warning">
-        <i data-lucide="trash-2" class="w-8 h-8"></i>
-      </div>
-      <div class="stat-title">Eventos Removidos</div>
-      <div class="stat-value text-warning">{{ session.events_deleted }}</div>
-      <div class="stat-desc">Eventos deletados</div>
-    </div>
-
-    <div class="stat bg-base-100 shadow-lg rounded-lg">
-      <div class="stat-figure text-error">
-        <i data-lucide="alert-circle" class="w-8 h-8"></i>
-      </div>
-      <div class="stat-title">Eventos com Falha</div>
-      <div class="stat-value text-error">{{ session.events_failed }}</div>
-      <div class="stat-desc">Não foi possível sincronizar</div>
-    </div>
-  </div>
-
-  <!-- Error Message -->
-  {% if session.error_message %}
-    <div class="alert alert-error mb-8">
-      <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-      <div>
-        <div class="font-bold">Erro durante a sincronização:</div>
-        <div class="text-sm mt-1">{{ session.error_message }}</div>
-      </div>
-    </div>
-  {% endif %}
-
-  <!-- Detalhes dos Eventos -->
-  <div class="card bg-base-100 shadow-lg">
-    <div class="card-body">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="card-title text-xl">
-          <i data-lucide="list" class="w-5 h-5"></i>
-          Eventos Processados
-        </h2>
-        <div class="text-sm text-base-content/60">
-          Total: {{ event_mappings|length }} eventos
-        </div>
-      </div>
-
-      {% if event_mappings %}
-        <div class="overflow-x-auto">
-          <table class="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th>Evento</th>
-                <th>Tipo</th>
-                <th>Data/Hora</th>
-                <th>Ação</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for mapping in event_mappings %}
-                <tr>
-                  <td>
-                    <div>
-                      <div class="font-semibold">{{ mapping.insper_event.title }}</div>
-                      {% if mapping.insper_event.discipline %}
-                        <div class="text-sm text-base-content/60">{{ mapping.insper_event.discipline }}</div>
-                      {% endif %}
-                    </div>
-                  </td>
-                  <td>
-                    {% if mapping.insper_event.event_type %}
-                      <span class="badge badge-outline badge-sm">{{ mapping.insper_event.event_type }}</span>
-                    {% else %}
-                      <span class="text-base-content/40">-</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    <div class="text-sm">
-                      <div>{{ mapping.insper_event.start_time|date:"d/m/Y" }}</div>
-                      <div class="text-base-content/60">
-                        {{ mapping.insper_event.start_time|time:"H:i" }} - 
-                        {{ mapping.insper_event.end_time|time:"H:i" }}
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    {% if mapping.action %}
-                      <span class="badge
-                        {% if mapping.action == 'created' %}badge-success
-                        {% elif mapping.action == 'updated' %}badge-info
-                        {% elif mapping.action == 'deleted' %}badge-warning
-                        {% else %}badge-neutral{% endif %} badge-sm">
-                        {% if mapping.action == 'created' %}Criado
-                        {% elif mapping.action == 'updated' %}Atualizado
-                        {% elif mapping.action == 'deleted' %}Removido
-                        {% else %}{{ mapping.action|title }}{% endif %}
-                      </span>
-                    {% else %}
-                      <span class="text-base-content/40">-</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if mapping.google_event %}
-                      <div class="flex items-center gap-1 text-success">
-                        <i data-lucide="check" class="w-4 h-4"></i>
-                        <span class="text-sm">Sincronizado</span>
-                      </div>
-                    {% else %}
-                      <div class="flex items-center gap-1 text-error">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                        <span class="text-sm">Falha</span>
-                      </div>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="text-center py-8">
-          <div class="w-16 h-16 mx-auto mb-4 text-base-content/20">
-            <i data-lucide="inbox" class="w-full h-full"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-base-content/70 mb-2">Nenhum evento processado</h3>
-          <p class="text-base-content/50">Esta sessão não processou nenhum evento.</p>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Ações -->
-  <div class="flex justify-between items-center mt-8">
-    <a href="{% url 'sync_history' %}" class="btn btn-ghost">
-      <i data-lucide="arrow-left" class="w-4 h-4"></i>
-      Voltar ao Histórico
-    </a>
-    
-    {% if session.status == 'completed' and event_mappings %}
-      <div class="flex gap-2">
-        <button class="btn btn-outline btn-sm" onclick="exportData()">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          Exportar Dados
-        </button>
-      </div>
-    {% endif %}
-  </div>
-
-  <!-- Informações Técnicas -->
-  <div class="collapse collapse-arrow bg-base-100 shadow-lg mt-8">
-    <input type="checkbox" />
-    <div class="collapse-title text-lg font-medium">
-      <i data-lucide="info" class="w-5 h-5 inline mr-2"></i>
-      Informações Técnicas
-    </div>
-    <div class="collapse-content">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-        <div>
-          <h4 class="font-semibold mb-2">Identificadores</h4>
-          <div class="space-y-1 text-sm">
-            <div><span class="font-medium">ID da Sessão:</span> {{ session.id }}</div>
-            <div><span class="font-medium">Usuário:</span> {{ session.user.username }}</div>
-            {% if session.task_id %}
-              <div><span class="font-medium">Task ID:</span> <code class="text-xs bg-base-200 px-1 rounded">{{ session.task_id }}</code></div>
-            {% endif %}
           </div>
         </div>
         
-        <div>
-          <h4 class="font-semibold mb-2">Tempos</h4>
-          <div class="space-y-1 text-sm">
-            <div><span class="font-medium">Iniciada:</span> {{ session.started_at|date:"d/m/Y H:i:s" }}</div>
-            {% if session.completed_at %}
-              <div><span class="font-medium">Concluída:</span> {{ session.completed_at|date:"d/m/Y H:i:s" }}</div>
-              <div><span class="font-medium">Duração:</span> {{ duration }}</div>
+        <div class="flex flex-wrap gap-4 text-sm text-base-content/70">
+          <div class="flex items-center gap-1">
+            <i data-lucide="calendar" class="w-3 h-3"></i>
+            <span>Iniciada em {{ session.started_at|date:"d/m/Y H:i:s" }}</span>
+          </div>
+          {% if session.completed_at %}
+            <div class="flex items-center gap-1">
+              <i data-lucide="flag" class="w-3 h-3"></i>
+              <span>Concluída em {{ session.completed_at|date:"d/m/Y H:i:s" }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <i data-lucide="clock" class="w-3 h-3"></i>
+              <span>Duração: {{ duration }}</span>
+            </div>
+          {% endif %}
+          <div class="flex items-center gap-1">
+            <i data-lucide="calendar-range" class="w-3 h-3"></i>
+            <span>Período: {{ session.sync_start_date|date:"d/m/Y" }} - {{ session.sync_end_date|date:"d/m/Y" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumo da Sessão -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-4 lg:p-6 border border-base-300/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-success/20 text-success rounded-lg flex items-center justify-center">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          </div>
+          <div class="badge badge-success badge-sm">+{{ session.events_created }}</div>
+        </div>
+        <div class="stat-value text-2xl font-bold text-success mb-1">{{ session.events_created }}</div>
+        <div class="stat-title text-xs text-base-content/60">Eventos Criados</div>
+        <div class="stat-desc text-xs">Novos eventos adicionados</div>
+      </div>
+
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-4 lg:p-6 border border-base-300/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-info/20 text-info rounded-lg flex items-center justify-center">
+            <i data-lucide="edit" class="w-5 h-5"></i>
+          </div>
+          <div class="badge badge-info badge-sm">{{ session.events_updated }}</div>
+        </div>
+        <div class="stat-value text-2xl font-bold text-info mb-1">{{ session.events_updated }}</div>
+        <div class="stat-title text-xs text-base-content/60">Eventos Atualizados</div>
+        <div class="stat-desc text-xs">Eventos modificados</div>
+      </div>
+
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-4 lg:p-6 border border-base-300/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-warning/20 text-warning rounded-lg flex items-center justify-center">
+            <i data-lucide="trash-2" class="w-5 h-5"></i>
+          </div>
+          <div class="badge badge-warning badge-sm">-{{ session.events_deleted }}</div>
+        </div>
+        <div class="stat-value text-2xl font-bold text-warning mb-1">{{ session.events_deleted }}</div>
+        <div class="stat-title text-xs text-base-content/60">Eventos Removidos</div>
+        <div class="stat-desc text-xs">Eventos deletados</div>
+      </div>
+
+      <div class="stat bg-base-100 shadow-lg rounded-xl p-4 lg:p-6 border border-base-300/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 {% if session.events_failed > 0 %}bg-error/20 text-error{% else %}bg-base-200 text-base-content/50{% endif %} rounded-lg flex items-center justify-center">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+          </div>
+          {% if session.events_failed > 0 %}
+            <div class="badge badge-error badge-sm">{{ session.events_failed }}</div>
+          {% else %}
+            <div class="badge badge-neutral badge-sm">0</div>
+          {% endif %}
+        </div>
+        <div class="stat-value text-2xl font-bold {% if session.events_failed > 0 %}text-error{% else %}text-base-content/50{% endif %} mb-1">
+          {{ session.events_failed }}
+        </div>
+        <div class="stat-title text-xs text-base-content/60">Eventos com Falha</div>
+        <div class="stat-desc text-xs">Não foi possível sincronizar</div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    {% if session.error_message %}
+      <div class="bg-error/10 border border-error/20 rounded-lg p-6 mb-8">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-error/20 text-error rounded-full flex items-center justify-center flex-shrink-0">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="font-bold text-error text-lg mb-2">Erro durante a sincronização</div>
+            <div class="text-base-content/80 mb-4">{{ session.error_message }}</div>
+            
+            {% if session.error_details %}
+              <details class="collapse collapse-arrow bg-base-100/50 border border-base-300/30">
+                <summary class="collapse-title text-sm font-medium">Detalhes técnicos do erro</summary>
+                <div class="collapse-content">
+                  <pre class="text-xs bg-base-200 p-3 rounded overflow-x-auto">{{ session.error_details|pprint }}</pre>
+                </div>
+              </details>
             {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Fonte de Dados -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Eventos do Insper -->
+      <div class="card bg-base-100 shadow-lg border border-base-300/50">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-primary/20 text-primary rounded-lg flex items-center justify-center">
+              <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-lg font-semibold">Eventos do Insper</h3>
+          </div>
+          
+          <div class="stat">
+            <div class="stat-value text-3xl font-bold text-primary">{{ session.insper_events_found }}</div>
+            <div class="stat-desc">eventos encontrados no portal acadêmico</div>
+          </div>
+          
+          <div class="text-sm text-base-content/60 mt-3">
+            Período analisado: {{ session.sync_start_date|date:"d/m/Y" }} até {{ session.sync_end_date|date:"d/m/Y" }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Eventos do Google -->
+      <div class="card bg-base-100 shadow-lg border border-base-300/50">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-500/20 text-red-500 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold">Eventos do Google</h3>
+          </div>
+          
+          <div class="stat">
+            <div class="stat-value text-3xl font-bold text-red-500">{{ session.google_events_found }}</div>
+            <div class="stat-desc">eventos existentes no Google Calendar</div>
+          </div>
+          
+          <div class="text-sm text-base-content/60 mt-3">
+            Eventos criados pelo Insper Sync no período
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalhes dos Eventos -->
+    <div class="card bg-base-100 shadow-lg border border-base-300/50">
+      <div class="card-body p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h2 class="text-xl font-bold flex items-center gap-2">
+            <i data-lucide="list" class="w-5 h-5"></i>
+            Eventos Processados
+          </h2>
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span>Total: {{ event_mappings|length }} eventos</span>
+          </div>
+        </div>
+
+        {% if event_mappings %}
+          <!-- Mobile View -->
+          <div class="lg:hidden space-y-4">
+            {% for mapping in event_mappings %}
+              <div class="card bg-base-200/50 border border-base-300/30">
+                <div class="card-body p-4">
+                  <div class="flex items-start justify-between gap-3 mb-3">
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-semibold truncate">{{ mapping.insper_event.title }}</h4>
+                      {% if mapping.insper_event.disciplina_codigo %}
+                        <p class="text-sm text-base-content/60">{{ mapping.insper_event.disciplina_codigo }}</p>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                      {% if mapping.insper_event.tipo_evento %}
+                        <div class="badge badge-outline badge-xs">{{ mapping.insper_event.tipo_evento }}</div>
+                      {% endif %}
+                      
+                      <div class="flex items-center gap-1">
+                        {% if mapping.google_event %}
+                          <i data-lucide="check" class="w-3 h-3 text-success"></i>
+                          <span class="text-xs text-success">Sincronizado</span>
+                        {% else %}
+                          <i data-lucide="x" class="w-3 h-3 text-error"></i>
+                          <span class="text-xs text-error">Falha</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center justify-between text-xs text-base-content/60">
+                    <span>{{ mapping.insper_event.start_datetime|date:"d/m/Y H:i" }}</span>
+                    <span>{{ mapping.insper_event.end_datetime|time:"H:i" }}</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Desktop View -->
+          <div class="hidden lg:block overflow-x-auto">
+            <table class="table table-zebra w-full">
+              <thead>
+                <tr class="border-base-300">
+                  <th class="bg-base-200">Evento</th>
+                  <th class="bg-base-200">Tipo</th>
+                  <th class="bg-base-200">Data/Hora</th>
+                  <th class="bg-base-200">Local</th>
+                  <th class="bg-base-200">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for mapping in event_mappings %}
+                  <tr class="hover:bg-base-200/50">
+                    <td>
+                      <div>
+                        <div class="font-semibold">{{ mapping.insper_event.title }}</div>
+                        {% if mapping.insper_event.disciplina_codigo %}
+                          <div class="text-sm text-base-content/60">{{ mapping.insper_event.disciplina_codigo }}</div>
+                        {% endif %}
+                        {% if mapping.insper_event.docente %}
+                          <div class="text-xs text-base-content/50">Prof. {{ mapping.insper_event.docente }}</div>
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td>
+                      {% if mapping.insper_event.tipo_evento %}
+                        <div class="badge badge-outline badge-sm">{{ mapping.insper_event.tipo_evento }}</div>
+                      {% else %}
+                        <span class="text-base-content/40">-</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="text-sm">
+                        <div class="font-medium">{{ mapping.insper_event.start_datetime|date:"d/m/Y" }}</div>
+                        <div class="text-base-content/60">
+                          {{ mapping.insper_event.start_datetime|time:"H:i" }} - 
+                          {{ mapping.insper_event.end_datetime|time:"H:i" }}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {% if mapping.insper_event.dependencia %}
+                        <div class="text-sm">{{ mapping.insper_event.dependencia }}</div>
+                      {% else %}
+                        <span class="text-base-content/40">-</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if mapping.google_event %}
+                        <div class="flex items-center gap-2 text-success">
+                          <i data-lucide="check" class="w-4 h-4"></i>
+                          <span class="text-sm">Sincronizado</span>
+                        </div>
+                      {% else %}
+                        <div class="flex items-center gap-2 text-error">
+                          <i data-lucide="x" class="w-4 h-4"></i>
+                          <span class="text-sm">Falha</span>
+                        </div>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-12">
+            <div class="w-16 h-16 mx-auto mb-4 text-base-content/20">
+              <i data-lucide="inbox" class="w-full h-full"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-base-content/70 mb-2">Nenhum evento processado</h3>
+            <p class="text-base-content/50">Esta sessão não processou nenhum evento no período especificado.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+      <a href="{% url 'sync_history' %}" class="btn btn-outline">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Voltar ao Histórico
+      </a>
+      
+      {% if session.status == 'completed' and event_mappings %}
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-outline btn-sm" onclick="exportData()">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Exportar Dados</span>
+          </button>
+          
+          <button class="btn btn-outline btn-sm" onclick="printReport()">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Imprimir Relatório</span>
+          </button>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Informações Técnicas -->
+    <div class="collapse collapse-arrow bg-base-100 shadow-lg border border-base-300/50 mt-8">
+      <input type="checkbox" />
+      <div class="collapse-title text-lg font-medium">
+        <i data-lucide="info" class="w-5 h-5 inline mr-2"></i>
+        Informações Técnicas
+      </div>
+      <div class="collapse-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+          <div>
+            <h4 class="font-semibold mb-3 text-primary">Identificadores</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-base-content/60">ID da Sessão:</span>
+                <span class="font-mono">{{ session.id }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-base-content/60">Usuário:</span>
+                <span>{{ session.user.email }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-base-content/60">Período:</span>
+                <span>{{ session.sync_start_date|date:"d/m/Y" }} - {{ session.sync_end_date|date:"d/m/Y" }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="font-semibold mb-3 text-primary">Cronologia</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-base-content/60">Iniciada:</span>
+                <span>{{ session.started_at|date:"d/m/Y H:i:s" }}</span>
+              </div>
+              {% if session.completed_at %}
+                <div class="flex justify-between">
+                  <span class="text-base-content/60">Concluída:</span>
+                  <span>{{ session.completed_at|date:"d/m/Y H:i:s" }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-base-content/60">Duração:</span>
+                  <span class="font-medium">{{ duration }}</span>
+                </div>
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
@@ -259,7 +410,9 @@
 
 <script>
   // Initialize Lucide icons
-  lucide.createIcons();
+  document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+  });
 
   // Export data function
   function exportData() {
@@ -269,20 +422,29 @@
         status: '{{ session.status }}',
         started_at: '{{ session.started_at|date:"c" }}',
         {% if session.completed_at %}completed_at: '{{ session.completed_at|date:"c" }}',{% endif %}
-        events_created: {{ session.events_created }},
-        events_updated: {{ session.events_updated }},
-        events_deleted: {{ session.events_deleted }},
-        events_failed: {{ session.events_failed }}
+        sync_period: {
+          start: '{{ session.sync_start_date|date:"Y-m-d" }}',
+          end: '{{ session.sync_end_date|date:"Y-m-d" }}'
+        },
+        statistics: {
+          insper_events_found: {{ session.insper_events_found }},
+          google_events_found: {{ session.google_events_found }},
+          events_created: {{ session.events_created }},
+          events_updated: {{ session.events_updated }},
+          events_deleted: {{ session.events_deleted }},
+          events_failed: {{ session.events_failed }}
+        }
       },
       events: [
         {% for mapping in event_mappings %}
         {
           title: '{{ mapping.insper_event.title|escapejs }}',
-          discipline: '{{ mapping.insper_event.discipline|escapejs }}',
-          event_type: '{{ mapping.insper_event.event_type|escapejs }}',
-          start_time: '{{ mapping.insper_event.start_time|date:"c" }}',
-          end_time: '{{ mapping.insper_event.end_time|date:"c" }}',
-          action: '{{ mapping.action|escapejs }}',
+          discipline: '{{ mapping.insper_event.disciplina_codigo|escapejs }}',
+          teacher: '{{ mapping.insper_event.docente|escapejs }}',
+          event_type: '{{ mapping.insper_event.tipo_evento|escapejs }}',
+          location: '{{ mapping.insper_event.dependencia|escapejs }}',
+          start_time: '{{ mapping.insper_event.start_datetime|date:"c" }}',
+          end_time: '{{ mapping.insper_event.end_datetime|date:"c" }}',
           synchronized: {% if mapping.google_event %}true{% else %}false{% endif %}
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
@@ -299,5 +461,17 @@
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+  // Print report function
+  function printReport() {
+    window.print();
+  }
 </script>
+
+<!-- Print styles -->
+<style media="print">
+  .breadcrumbs, .btn, .collapse { display: none !important; }
+  .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .stat { break-inside: avoid; }
+</style>
 {% endblock %}
