@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurações de Sincronização - Insper Sync{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><a href="{% url 'dashboard' %}" class="link link-hover">Dashboard</a></li>
+        <li>Configurações de Sincronização</li>
+      </ul>
+    </div>
+    
+    <div class="flex items-center gap-3 mt-4">
+      <i data-lucide="settings" class="w-8 h-8 text-primary"></i>
+      <div>
+        <h1 class="text-3xl font-bold text-base-content">Configurações de Sincronização</h1>
+        <p class="text-base-content/70 mt-1">Personalize como seus eventos do Insper são sincronizados com o Google Calendar</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} mb-6">
+        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5"></i>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    
+    <!-- Configurações Gerais -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body">
+        <h2 class="card-title text-xl mb-4">
+          <i data-lucide="toggle-left" class="w-5 h-5"></i>
+          Configurações Gerais
+        </h2>
+        
+        <div class="space-y-4">
+          <!-- Sincronização Habilitada -->
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text font-medium">
+                <i data-lucide="power" class="w-4 h-4 inline mr-2"></i>
+                Habilitar Sincronização Automática
+              </span>
+              <input 
+                type="checkbox" 
+                name="sync_enabled" 
+                class="toggle toggle-primary"
+                {% if sync_config.sync_enabled %}checked{% endif %}
+              />
+            </label>
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Quando habilitado, seus eventos serão sincronizados automaticamente
+              </span>
+            </div>
+          </div>
+
+          <!-- Frequência de Sincronização -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">
+                <i data-lucide="clock" class="w-4 h-4 inline mr-2"></i>
+                Frequência de Sincronização (horas)
+              </span>
+            </label>
+            <select name="sync_frequency_hours" class="select select-bordered w-full max-w-xs">
+              <option value="1" {% if sync_config.sync_frequency_hours == 1 %}selected{% endif %}>A cada 1 hora</option>
+              <option value="2" {% if sync_config.sync_frequency_hours == 2 %}selected{% endif %}>A cada 2 horas</option>
+              <option value="4" {% if sync_config.sync_frequency_hours == 4 %}selected{% endif %}>A cada 4 horas</option>
+              <option value="6" {% if sync_config.sync_frequency_hours == 6 %}selected{% endif %}>A cada 6 horas</option>
+              <option value="12" {% if sync_config.sync_frequency_hours == 12 %}selected{% endif %}>A cada 12 horas</option>
+              <option value="24" {% if sync_config.sync_frequency_hours == 24 %}selected{% endif %}>Uma vez por dia</option>
+            </select>
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Com que frequência verificar novos eventos
+              </span>
+            </div>
+          </div>
+
+          <!-- Nome do Calendário -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">
+                <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                Nome do Calendário no Google
+              </span>
+            </label>
+            <input 
+              type="text" 
+              name="google_calendar_name" 
+              value="{{ sync_config.google_calendar_name }}"
+              placeholder="Insper Sync"
+              class="input input-bordered w-full max-w-md"
+              required
+            />
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Nome que aparecerá no seu Google Calendar
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formatação de Eventos -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body">
+        <h2 class="card-title text-xl mb-4">
+          <i data-lucide="edit-3" class="w-5 h-5"></i>
+          Formatação de Eventos
+        </h2>
+        
+        <div class="space-y-4">
+          <!-- Prefixo Insper -->
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text font-medium">
+                <i data-lucide="tag" class="w-4 h-4 inline mr-2"></i>
+                Adicionar prefixo "[Insper]" aos eventos
+              </span>
+              <input 
+                type="checkbox" 
+                name="add_insper_prefix" 
+                class="toggle toggle-primary"
+                {% if sync_config.add_insper_prefix %}checked{% endif %}
+              />
+            </label>
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Exemplo: "[Insper] Aula de Matemática"
+              </span>
+            </div>
+          </div>
+
+          <!-- Professor na Descrição -->
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text font-medium">
+                <i data-lucide="user" class="w-4 h-4 inline mr-2"></i>
+                Incluir nome do professor na descrição
+              </span>
+              <input 
+                type="checkbox" 
+                name="include_teacher_in_description" 
+                class="toggle toggle-primary"
+                {% if sync_config.include_teacher_in_description %}checked{% endif %}
+              />
+            </label>
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Adiciona informações do professor no corpo do evento
+              </span>
+            </div>
+          </div>
+
+          <!-- Código da Disciplina -->
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text font-medium">
+                <i data-lucide="hash" class="w-4 h-4 inline mr-2"></i>
+                Incluir código da disciplina
+              </span>
+              <input 
+                type="checkbox" 
+                name="include_discipline_code" 
+                class="toggle toggle-primary"
+                {% if sync_config.include_discipline_code %}checked{% endif %}
+              />
+            </label>
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Adiciona o código da disciplina ao título ou descrição
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body">
+        <h2 class="card-title text-xl mb-4">
+          <i data-lucide="filter" class="w-5 h-5"></i>
+          Filtros de Sincronização
+        </h2>
+        
+        <div class="space-y-4">
+          <!-- Tipos de Evento Excluídos -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">
+                <i data-lucide="x-circle" class="w-4 h-4 inline mr-2"></i>
+                Tipos de eventos para excluir
+              </span>
+            </label>
+            <input 
+              type="text" 
+              name="excluded_event_types" 
+              value="{{ excluded_event_types_str }}"
+              placeholder="prova, trabalho, seminário"
+              class="input input-bordered w-full"
+            />
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Separe os tipos por vírgula. Eventos com estes tipos não serão sincronizados
+              </span>
+            </div>
+          </div>
+
+          <!-- Disciplinas Excluídas -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">
+                <i data-lucide="book-x" class="w-4 h-4 inline mr-2"></i>
+                Disciplinas para excluir
+              </span>
+            </label>
+            <input 
+              type="text" 
+              name="excluded_disciplines" 
+              value="{{ excluded_disciplines_str }}"
+              placeholder="Matemática, Física"
+              class="input input-bordered w-full"
+            />
+            <div class="label">
+              <span class="label-text-alt text-base-content/60">
+                Separe as disciplinas por vírgula. Eventos destas disciplinas não serão sincronizados
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body">
+        <div class="card-actions justify-between items-center">
+          <a href="{% url 'dashboard' %}" class="btn btn-ghost">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Voltar
+          </a>
+          
+          <div class="flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              Salvar Configurações
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Zona de Perigo -->
+  <div class="card bg-error/5 border border-error/20 shadow-lg mt-8">
+    <div class="card-body">
+      <h2 class="card-title text-error text-xl mb-4">
+        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        Zona de Perigo
+      </h2>
+      
+      <div class="space-y-4">
+        <div class="alert alert-warning">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          <div>
+            <h3 class="font-bold">Atenção!</h3>
+            <div class="text-sm">As ações abaixo são irreversíveis e podem afetar seus dados de sincronização.</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{% url 'clear_sync_history' %}" class="btn btn-warning btn-outline">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Limpar Histórico
+          </a>
+          
+          <button type="button" class="btn btn-error btn-outline" onclick="reset_modal.showModal()">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            Resetar Todos os Dados
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmação de Reset -->
+<dialog id="reset_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg text-error">Confirmar Reset Completo</h3>
+    <div class="py-4">
+      <div class="alert alert-error mb-4">
+        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        <div>
+          <div class="font-bold">Esta ação é irreversível!</div>
+          <div class="text-sm">Todos os seus dados de sincronização serão removidos permanentemente.</div>
+        </div>
+      </div>
+      
+      <p class="mb-4">Isso incluirá:</p>
+      <ul class="list-disc list-inside space-y-1 text-sm mb-4">
+        <li>Todos os eventos sincronizados</li>
+        <li>Histórico de sincronizações</li>
+        <li>Mapeamentos de eventos</li>
+        <li>Data da última sincronização</li>
+      </ul>
+      
+      <form method="post" action="{% url 'reset_sync_data' %}">
+        {% csrf_token %}
+        <div class="form-control mb-4">
+          <label class="label">
+            <span class="label-text">Digite "RESET" para confirmar:</span>
+          </label>
+          <input 
+            type="text" 
+            name="confirm" 
+            class="input input-bordered input-error" 
+            placeholder="RESET"
+            required 
+          />
+        </div>
+        
+        <div class="modal-action">
+          <button type="button" class="btn btn-ghost" onclick="reset_modal.close()">Cancelar</button>
+          <button type="submit" class="btn btn-error">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Resetar Dados
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+</script>
+{% endblock %}

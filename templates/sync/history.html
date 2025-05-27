@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Sincronizações - Insper Sync{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><a href="{% url 'dashboard' %}" class="link link-hover">Dashboard</a></li>
+        <li>Histórico de Sincronizações</li>
+      </ul>
+    </div>
+
+    <div class="flex items-center gap-3 mt-4">
+      <i data-lucide="history" class="w-8 h-8 text-primary"></i>
+      <div>
+        <h1 class="text-3xl font-bold text-base-content">Histórico de Sincronizações</h1>
+        <p class="text-base-content/70 mt-1">Acompanhe todas as suas sincronizações realizadas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} mb-6">
+        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5"></i>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Estatísticas -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-primary">
+        <i data-lucide="activity" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Total de Sessões</div>
+      <div class="stat-value text-primary">{{ total_sessions }}</div>
+      <div class="stat-desc">Sincronizações realizadas</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-success">
+        <i data-lucide="check-circle" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Bem-sucedidas</div>
+      <div class="stat-value text-success">{{ successful_sessions }}</div>
+      <div class="stat-desc">
+        {% if total_sessions > 0 %}
+          {{ successful_sessions }}/{{ total_sessions }} ({{ successful_percentage }}%)
+        {% else %}
+          0%
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-error">
+        <i data-lucide="x-circle" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Com Falhas</div>
+      <div class="stat-value text-error">{{ failed_sessions }}</div>
+      <div class="stat-desc">
+        {% if total_sessions > 0 %}
+          {{ failed_sessions }}/{{ total_sessions }} ({{ failed_percentage }}%)
+        {% else %}
+          0%
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-info">
+        <i data-lucide="clock" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Última Sincronização</div>
+      <div class="stat-value text-sm">
+        {% if last_successful_sync %}
+          {{ last_successful_sync.started_at|date:"d/m/Y" }}
+        {% else %}
+          Nunca
+        {% endif %}
+      </div>
+      <div class="stat-desc">
+        {% if last_successful_sync %}
+          {{ last_successful_sync.started_at|timesince }} atrás
+        {% else %}
+          Nenhuma sincronização realizada
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Ações -->
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex gap-2">
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Voltar
+      </a>
+    </div>
+    
+    <div class="flex gap-2">
+      {% if total_sessions > 10 %}
+        <form method="post" action="{% url 'clear_sync_history' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning btn-outline" onclick="return confirm('Tem certeza que deseja limpar o histórico? Esta ação manterá apenas as 10 sessões mais recentes.')">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Limpar Histórico
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Lista de Sincronizações -->
+  {% if sync_sessions %}
+    <div class="space-y-4">
+      {% for session in sync_sessions %}
+        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+          <div class="card-body">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <!-- Info Principal -->
+              <div class="flex items-center gap-4">
+                <!-- Status Icon -->
+                <div class="avatar">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center
+                    {% if session.status == 'completed' %}bg-success/20 text-success
+                    {% elif session.status == 'failed' %}bg-error/20 text-error
+                    {% elif session.status == 'running' %}bg-warning/20 text-warning
+                    {% else %}bg-base-200 text-base-content{% endif %}">
+                    {% if session.status == 'completed' %}
+                      <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    {% elif session.status == 'failed' %}
+                      <i data-lucide="x-circle" class="w-6 h-6"></i>
+                    {% elif session.status == 'running' %}
+                      <i data-lucide="loader" class="w-6 h-6 animate-spin"></i>
+                    {% else %}
+                      <i data-lucide="clock" class="w-6 h-6"></i>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Detalhes -->
+                <div>
+                  <h3 class="font-semibold text-lg">
+                    Sincronização #{{ session.id }}
+                    <span class="badge badge-sm 
+                      {% if session.status == 'completed' %}badge-success
+                      {% elif session.status == 'failed' %}badge-error  
+                      {% elif session.status == 'running' %}badge-warning
+                      {% else %}badge-neutral{% endif %} ml-2">
+                      {% if session.status == 'completed' %}Concluída
+                      {% elif session.status == 'failed' %}Falhou
+                      {% elif session.status == 'running' %}Em Execução
+                      {% else %}{{ session.status|title }}{% endif %}
+                    </span>
+                  </h3>
+                  
+                  <div class="flex flex-wrap gap-4 text-sm text-base-content/70 mt-1">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="calendar" class="w-3 h-3"></i>
+                      {{ session.started_at|date:"d/m/Y H:i" }}
+                    </span>
+                    
+                    {% if session.completed_at %}
+                      <span class="flex items-center gap-1">
+                        <i data-lucide="clock" class="w-3 h-3"></i>
+                        Duração: {{ session.duration }}
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estatísticas da Sessão -->
+              <div class="flex flex-wrap gap-4 text-sm">
+                {% if session.status == 'completed' %}
+                  <div class="stat stat-compact">
+                    <div class="stat-title text-xs">Criados</div>
+                    <div class="stat-value text-success text-lg">{{ session.events_created }}</div>
+                  </div>
+                  
+                  <div class="stat stat-compact">
+                    <div class="stat-title text-xs">Atualizados</div>
+                    <div class="stat-value text-info text-lg">{{ session.events_updated }}</div>
+                  </div>
+                  
+                  <div class="stat stat-compact">
+                    <div class="stat-title text-xs">Removidos</div>
+                    <div class="stat-value text-warning text-lg">{{ session.events_deleted }}</div>
+                  </div>
+                  
+                  {% if session.events_failed > 0 %}
+                    <div class="stat stat-compact">
+                      <div class="stat-title text-xs">Falharam</div>
+                      <div class="stat-value text-error text-lg">{{ session.events_failed }}</div>
+                    </div>
+                  {% endif %}
+                {% endif %}
+              </div>
+
+              <!-- Ações -->
+              <div class="flex gap-2">
+                <a href="{% url 'sync_session_detail' session.id %}" class="btn btn-outline btn-sm">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                  Detalhes
+                </a>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            {% if session.error_message %}
+              <div class="alert alert-error mt-4">
+                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                <div>
+                  <div class="font-bold">Erro durante a sincronização:</div>
+                  <div class="text-sm">{{ session.error_message }}</div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if is_paginated %}
+      <div class="flex justify-center mt-8">
+        <div class="join">
+          {% if page_obj.has_previous %}
+            <a href="?page=1" class="join-item btn btn-outline">
+              <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </a>
+          {% endif %}
+
+          <button class="join-item btn btn-active">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+          </button>
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="join-item btn btn-outline">
+              <i data-lucide="chevrons-right" class="w-4 h-4"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <!-- Estado Vazio -->
+    <div class="text-center py-12">
+      <div class="w-24 h-24 mx-auto mb-6 text-base-content/20">
+        <i data-lucide="history" class="w-full h-full"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-base-content/70 mb-2">Nenhuma sincronização encontrada</h3>
+      <p class="text-base-content/50 mb-6">Você ainda não realizou nenhuma sincronização.</p>
+      <a href="{% url 'dashboard' %}" class="btn btn-primary">
+        <i data-lucide="play" class="w-4 h-4"></i>
+        Iniciar Primeira Sincronização
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+</script>
+{% endblock %}

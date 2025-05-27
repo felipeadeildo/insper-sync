@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes da Sincronização #{{ session.id }} - Insper Sync{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="breadcrumbs text-sm">
+      <ul>
+        <li><a href="{% url 'dashboard' %}" class="link link-hover">Dashboard</a></li>
+        <li><a href="{% url 'sync_history' %}" class="link link-hover">Histórico</a></li>
+        <li>Sincronização #{{ session.id }}</li>
+      </ul>
+    </div>
+    
+    <div class="flex items-center gap-3 mt-4">
+      <div class="avatar">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center
+          {% if session.status == 'completed' %}bg-success/20 text-success
+          {% elif session.status == 'failed' %}bg-error/20 text-error
+          {% elif session.status == 'running' %}bg-warning/20 text-warning
+          {% else %}bg-base-200 text-base-content{% endif %}">
+          {% if session.status == 'completed' %}
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
+          {% elif session.status == 'failed' %}
+            <i data-lucide="x-circle" class="w-6 h-6"></i>
+          {% elif session.status == 'running' %}
+            <i data-lucide="loader" class="w-6 h-6 animate-spin"></i>
+          {% else %}
+            <i data-lucide="clock" class="w-6 h-6"></i>
+          {% endif %}
+        </div>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-base-content">
+          Sincronização #{{ session.id }}
+          <span class="badge badge-lg 
+            {% if session.status == 'completed' %}badge-success
+            {% elif session.status == 'failed' %}badge-error  
+            {% elif session.status == 'running' %}badge-warning
+            {% else %}badge-neutral{% endif %} ml-2">
+            {% if session.status == 'completed' %}Concluída
+            {% elif session.status == 'failed' %}Falhou
+            {% elif session.status == 'running' %}Em Execução
+            {% else %}{{ session.status|title }}{% endif %}
+          </span>
+        </h1>
+        <p class="text-base-content/70 mt-1">
+          Iniciada em {{ session.started_at|date:"d/m/Y H:i:s" }}
+          {% if session.completed_at %}
+            • Concluída em {{ session.completed_at|date:"d/m/Y H:i:s" }}
+            • Duração: {{ duration }}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumo da Sessão -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-success">
+        <i data-lucide="plus-circle" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Eventos Criados</div>
+      <div class="stat-value text-success">{{ session.events_created }}</div>
+      <div class="stat-desc">Novos eventos adicionados</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-info">
+        <i data-lucide="edit" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Eventos Atualizados</div>
+      <div class="stat-value text-info">{{ session.events_updated }}</div>
+      <div class="stat-desc">Eventos modificados</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-warning">
+        <i data-lucide="trash-2" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Eventos Removidos</div>
+      <div class="stat-value text-warning">{{ session.events_deleted }}</div>
+      <div class="stat-desc">Eventos deletados</div>
+    </div>
+
+    <div class="stat bg-base-100 shadow-lg rounded-lg">
+      <div class="stat-figure text-error">
+        <i data-lucide="alert-circle" class="w-8 h-8"></i>
+      </div>
+      <div class="stat-title">Eventos com Falha</div>
+      <div class="stat-value text-error">{{ session.events_failed }}</div>
+      <div class="stat-desc">Não foi possível sincronizar</div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  {% if session.error_message %}
+    <div class="alert alert-error mb-8">
+      <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+      <div>
+        <div class="font-bold">Erro durante a sincronização:</div>
+        <div class="text-sm mt-1">{{ session.error_message }}</div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Detalhes dos Eventos -->
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="card-title text-xl">
+          <i data-lucide="list" class="w-5 h-5"></i>
+          Eventos Processados
+        </h2>
+        <div class="text-sm text-base-content/60">
+          Total: {{ event_mappings|length }} eventos
+        </div>
+      </div>
+
+      {% if event_mappings %}
+        <div class="overflow-x-auto">
+          <table class="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Tipo</th>
+                <th>Data/Hora</th>
+                <th>Ação</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for mapping in event_mappings %}
+                <tr>
+                  <td>
+                    <div>
+                      <div class="font-semibold">{{ mapping.insper_event.title }}</div>
+                      {% if mapping.insper_event.discipline %}
+                        <div class="text-sm text-base-content/60">{{ mapping.insper_event.discipline }}</div>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    {% if mapping.insper_event.event_type %}
+                      <span class="badge badge-outline badge-sm">{{ mapping.insper_event.event_type }}</span>
+                    {% else %}
+                      <span class="text-base-content/40">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="text-sm">
+                      <div>{{ mapping.insper_event.start_time|date:"d/m/Y" }}</div>
+                      <div class="text-base-content/60">
+                        {{ mapping.insper_event.start_time|time:"H:i" }} - 
+                        {{ mapping.insper_event.end_time|time:"H:i" }}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {% if mapping.action %}
+                      <span class="badge
+                        {% if mapping.action == 'created' %}badge-success
+                        {% elif mapping.action == 'updated' %}badge-info
+                        {% elif mapping.action == 'deleted' %}badge-warning
+                        {% else %}badge-neutral{% endif %} badge-sm">
+                        {% if mapping.action == 'created' %}Criado
+                        {% elif mapping.action == 'updated' %}Atualizado
+                        {% elif mapping.action == 'deleted' %}Removido
+                        {% else %}{{ mapping.action|title }}{% endif %}
+                      </span>
+                    {% else %}
+                      <span class="text-base-content/40">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if mapping.google_event %}
+                      <div class="flex items-center gap-1 text-success">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span class="text-sm">Sincronizado</span>
+                      </div>
+                    {% else %}
+                      <div class="flex items-center gap-1 text-error">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        <span class="text-sm">Falha</span>
+                      </div>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-8">
+          <div class="w-16 h-16 mx-auto mb-4 text-base-content/20">
+            <i data-lucide="inbox" class="w-full h-full"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-base-content/70 mb-2">Nenhum evento processado</h3>
+          <p class="text-base-content/50">Esta sessão não processou nenhum evento.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Ações -->
+  <div class="flex justify-between items-center mt-8">
+    <a href="{% url 'sync_history' %}" class="btn btn-ghost">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      Voltar ao Histórico
+    </a>
+    
+    {% if session.status == 'completed' and event_mappings %}
+      <div class="flex gap-2">
+        <button class="btn btn-outline btn-sm" onclick="exportData()">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Exportar Dados
+        </button>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Informações Técnicas -->
+  <div class="collapse collapse-arrow bg-base-100 shadow-lg mt-8">
+    <input type="checkbox" />
+    <div class="collapse-title text-lg font-medium">
+      <i data-lucide="info" class="w-5 h-5 inline mr-2"></i>
+      Informações Técnicas
+    </div>
+    <div class="collapse-content">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+        <div>
+          <h4 class="font-semibold mb-2">Identificadores</h4>
+          <div class="space-y-1 text-sm">
+            <div><span class="font-medium">ID da Sessão:</span> {{ session.id }}</div>
+            <div><span class="font-medium">Usuário:</span> {{ session.user.username }}</div>
+            {% if session.task_id %}
+              <div><span class="font-medium">Task ID:</span> <code class="text-xs bg-base-200 px-1 rounded">{{ session.task_id }}</code></div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-2">Tempos</h4>
+          <div class="space-y-1 text-sm">
+            <div><span class="font-medium">Iniciada:</span> {{ session.started_at|date:"d/m/Y H:i:s" }}</div>
+            {% if session.completed_at %}
+              <div><span class="font-medium">Concluída:</span> {{ session.completed_at|date:"d/m/Y H:i:s" }}</div>
+              <div><span class="font-medium">Duração:</span> {{ duration }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Export data function
+  function exportData() {
+    const data = {
+      session: {
+        id: {{ session.id }},
+        status: '{{ session.status }}',
+        started_at: '{{ session.started_at|date:"c" }}',
+        {% if session.completed_at %}completed_at: '{{ session.completed_at|date:"c" }}',{% endif %}
+        events_created: {{ session.events_created }},
+        events_updated: {{ session.events_updated }},
+        events_deleted: {{ session.events_deleted }},
+        events_failed: {{ session.events_failed }}
+      },
+      events: [
+        {% for mapping in event_mappings %}
+        {
+          title: '{{ mapping.insper_event.title|escapejs }}',
+          discipline: '{{ mapping.insper_event.discipline|escapejs }}',
+          event_type: '{{ mapping.insper_event.event_type|escapejs }}',
+          start_time: '{{ mapping.insper_event.start_time|date:"c" }}',
+          end_time: '{{ mapping.insper_event.end_time|date:"c" }}',
+          action: '{{ mapping.action|escapejs }}',
+          synchronized: {% if mapping.google_event %}true{% else %}false{% endif %}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sync-session-{{ session.id }}-{{ session.started_at|date:"Y-m-d" }}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+{% endblock %}

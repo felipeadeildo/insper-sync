@@ -189,9 +189,25 @@ class SyncHistoryView(ListView):
 
         # Estatísticas gerais
         sessions = self.get_queryset()
-        context["total_sessions"] = sessions.count()
-        context["successful_sessions"] = sessions.filter(status="completed").count()
-        context["failed_sessions"] = sessions.filter(status="failed").count()
+        total_sessions = sessions.count()
+        successful_sessions = sessions.filter(status="completed").count()
+        failed_sessions = sessions.filter(status="failed").count()
+
+        context["total_sessions"] = total_sessions
+        context["successful_sessions"] = successful_sessions
+        context["failed_sessions"] = failed_sessions
+
+        # Cálculo de percentuais
+        if total_sessions > 0:
+            context["successful_percentage"] = round(
+                (successful_sessions / total_sessions) * 100, 1
+            )
+            context["failed_percentage"] = round(
+                (failed_sessions / total_sessions) * 100, 1
+            )
+        else:
+            context["successful_percentage"] = 0
+            context["failed_percentage"] = 0
 
         # Última sincronização bem-sucedida
         last_successful = sessions.filter(status="completed").first()
