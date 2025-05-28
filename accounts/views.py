@@ -47,31 +47,34 @@ def verify_email(request):
 
 
 def verify_token(request, token):
-    """View para verificar o token enviado por email"""
+    """View for verifying the token sent by email"""
     verification_token = get_object_or_404(EmailVerificationToken, token=token)
 
     if not verification_token.is_valid():
         messages.error(request, "Token inválido ou expirado.")
         return redirect("home")
 
-    # Ativar usuário e marcar email como verificado
-    user = verification_token.user
-    user.email_verified = True
-    user.is_active = True
-    user.save()
+    # Check if it's an API request to consume the token
+    if request.method == "POST":
+        user = verification_token.user
+        user.email_verified = True
+        user.is_active = True
+        user.save()
 
-    # Marcar token como usado
-    verification_token.use()
+        verification_token.use()
 
-    # Fazer login automático
-    login(request, user)
+        login(request, user)
+        messages.success(
+            request, f"Email verificado com sucesso! Bem-vindo(a), {user.name}!"
+        )
 
-    messages.success(
-        request, f"Email verificado com sucesso! Bem-vindo(a), {user.name}!"
+        return redirect("setup_credentials")
+
+    return render(
+        request,
+        "accounts/verify_token.html",
+        {"token": token, "email": verification_token.user.email},
     )
-
-    # Redirecionar para configuração de credenciais
-    return redirect("setup_credentials")
 
 
 @login_required
