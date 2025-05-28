@@ -64,6 +64,7 @@ jobs:
           # Django
           DEBUG=False
           SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DATABASE_PATH=/app/db_data/db.sqlite3
 
           # Email Configuration
           EMAIL_HOST=${{ secrets.EMAIL_HOST }}
@@ -84,8 +85,11 @@ jobs:
 
       - name: Deploy services
         run: |
-          docker compose down --remove-orphans || true
-          docker compose build --no-cache
+          # Stop containers but keep volumes
+          docker compose down || true
+
+          # Build and start services
+          docker compose build
           docker compose up -d
 
       - name: Cleanup

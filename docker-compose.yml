@@ -21,12 +21,14 @@ services:
     volumes:
       - .:/app
       - /tmp/inpser-sync-cache:/app/cache
+      - sqlite_data:/app/db_data
     env_file:
       - .env
     environment:
       - DEBUG=False
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_PATH=/app/db_data/db.sqlite3
     depends_on:
       redis:
         condition: service_healthy
@@ -39,12 +41,14 @@ services:
     volumes:
       - .:/app
       - /tmp/inpser-sync-cache:/app/cache
+      - sqlite_data:/app/db_data
     env_file:
       - .env
     environment:
       - DEBUG=False
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_PATH=/app/db_data/db.sqlite3
     depends_on:
       redis:
         condition: service_healthy
@@ -53,3 +57,4 @@ services:
 
 volumes:
   redis_data:
+  sqlite_data:
