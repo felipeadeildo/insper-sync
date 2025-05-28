@@ -1,5 +1,3 @@
-# sync/tasks.py
-
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
@@ -192,9 +190,10 @@ def _perform_sync(
 
 def _fetch_insper_events(
     user: User, start_dt: datetime, end_dt: datetime
-) -> List[Dict]:
+) -> List[InsperEvent]:
     """
-    Busca eventos do calendário do Insper
+    Busca eventos do calendário do Insper e salva/atualiza no banco,
+    retornando objetos InsperEvent (model Django)
 
     Args:
         user: Usuário
@@ -202,9 +201,11 @@ def _fetch_insper_events(
         end_dt: Data de fim
 
     Returns:
-        Lista de eventos do Insper
+        Lista de objetos InsperEvent
     """
     try:
+        from core.insper import InsperEvent as InsperEventSrc
+
         with InsperAuth() as auth:
             # Faz login no Insper
             success = auth.login(
@@ -215,10 +216,18 @@ def _fetch_insper_events(
 
             # Busca eventos
             calendar = InsperCalendar(auth)
-            events = calendar.get_events_for_range(start_dt, end_dt)
+            events: List[InsperEventSrc] = calendar.get_events_for_range(
+                start_dt, end_dt
+            )
 
-            # Converte para formato padrão
-            return [_convert_insper_event_to_dict(event) for event in events]
+            # Salva/atualiza todos no banco e retorna objetos
+            insper_event_objs = []
+            for event in events:
+                # Converte para dict e salva usando função já existente
+                event_dict = _convert_insper_event_to_dict(event)
+                insper_event_obj = _save_insper_event(user, event_dict)
+                insper_event_objs.append(insper_event_obj)
+            return insper_event_objs
 
     except Exception as e:
         logger.error(f"Erro ao buscar eventos do Insper: {str(e)}")
@@ -314,9 +323,10 @@ def _setup_google_calendar(user: User, sync_config: SyncConfiguration) -> str:
 
 def _fetch_google_events(
     user: User, calendar_id: str, start_dt: datetime, end_dt: datetime
-) -> List[Dict]:
+) -> List[GoogleEvent]:
     """
-    Busca eventos existentes do Google Calendar
+    Busca eventos existentes do Google Calendar e salva/atualiza no banco,
+    retornando objetos GoogleEvent (model Django)
 
     Args:
         user: Usuário
@@ -325,7 +335,7 @@ def _fetch_google_events(
         end_dt: Data de fim
 
     Returns:
-        Lista de eventos do Google
+        Lista de objetos GoogleEvent
     """
     # Obtém token válido
     success, access_token, error = get_or_refresh_access_token(user)
@@ -341,14 +351,15 @@ def _fetch_google_events(
     if not success:
         raise Exception(f"Erro ao buscar eventos do Google: {error}")
 
-    # Filtra apenas eventos criados pelo Insper Sync
-    insper_events = []
+    # Filtra apenas eventos criados pelo Insper Sync e salva/atualiza no banco
+    google_event_objs = []
     for event in events or []:
         extended_props = event.get("extendedProperties", {}).get("private", {})
         if extended_props.get("sync_source") == "insper":
-            insper_events.append(event)
+            google_event_obj = _save_google_event(user, event)
+            google_event_objs.append(google_event_obj)
 
-    return insper_events
+    return google_event_objs
 
 
 def _synchronize_events(
@@ -356,8 +367,8 @@ def _synchronize_events(
     sync_config: SyncConfiguration,
     sync_session: SyncSession,
     google_calendar_id: str,
-    insper_events: List[Dict],
-    google_events: List[Dict],
+    insper_events: List[InsperEvent],
+    google_events: List[GoogleEvent],
 ) -> Dict[str, int]:
     """
     Sincroniza eventos entre Insper e Google
@@ -383,37 +394,30 @@ def _synchronize_events(
     client = GoogleCalendarClient(access_token)
 
     # Cria mapeamento de eventos existentes
-    google_events_map = {
-        event.get("extendedProperties", {})
-        .get("private", {})
-        .get("insper_event_id", ""): event
-        for event in google_events
-    }
+    google_events_map = {}
+    for event in google_events:
+        ext_props = event.raw_data.get("extendedProperties", {})
+        private = ext_props.get("private", {})
+        insper_event_id = private.get("insper_event_id", "")
+        if insper_event_id:
+            google_events_map[insper_event_id] = event
 
     # Processa eventos do Insper
-    for insper_event_data in insper_events:
+    for insper_event in insper_events:
         try:
-            # Verifica se deve sincronizar este evento
-            if not _should_sync_event(insper_event_data, sync_config):
+            if not _should_sync_event(insper_event, sync_config):
                 continue
-
-            # Salva ou atualiza evento do Insper no banco
-            insper_event = _save_insper_event(user, insper_event_data)
-
-            # Verifica se já existe no Google
-            insper_event_id = insper_event_data["id"]
+            insper_event_id = insper_event.insper_event_id
             existing_google_event = google_events_map.get(insper_event_id)
-
             if existing_google_event:
-                # Evento já existe - verifica se precisa atualizar
                 if _event_needs_update(
-                    insper_event_data, existing_google_event, sync_config
+                    insper_event, existing_google_event, sync_config
                 ):
                     success = _update_google_event(
                         client,
                         google_calendar_id,
                         existing_google_event,
-                        insper_event_data,
+                        insper_event,
                         sync_config,
                     )
                     if success:
@@ -424,64 +428,64 @@ def _synchronize_events(
                     else:
                         stats["failed"] += 1
             else:
-                # Evento novo - cria no Google
                 google_event = _create_google_event(
-                    client, google_calendar_id, insper_event_data, sync_config
+                    client, google_calendar_id, insper_event, sync_config
                 )
                 if google_event:
                     stats["created"] += 1
-                    _save_google_event(user, google_event)
+                    google_event_obj = _save_google_event(user, google_event)
                     _create_event_mapping(
-                        sync_session, insper_event, google_event, "synced"
+                        sync_session, insper_event, google_event_obj, "synced"
                     )
                 else:
                     stats["failed"] += 1
-
         except Exception as e:
             logger.error(
-                f"Erro ao processar evento {insper_event_data.get('id', 'unknown')}: {str(e)}"
+                f"Erro ao processar evento {getattr(insper_event, 'insper_event_id', 'unknown')}: {str(e)}"
             )
             stats["failed"] += 1
 
     # Remove eventos que não existem mais no Insper
-    insper_event_ids = {event["id"] for event in insper_events}
+    insper_event_ids = {event.insper_event_id for event in insper_events}
     for google_event in google_events:
-        google_insper_id = (
-            google_event.get("extendedProperties", {})
-            .get("private", {})
-            .get("insper_event_id", "")
-        )
+        ext_props = google_event.raw_data.get("extendedProperties", {})
+        private = ext_props.get("private", {})
+        google_insper_id = private.get("insper_event_id", "")
         if google_insper_id and google_insper_id not in insper_event_ids:
-            success, error = client.delete_event(google_calendar_id, google_event["id"])
+            success, error = client.delete_event(
+                google_calendar_id, google_event.google_event_id
+            )
             if success:
                 stats["deleted"] += 1
-                # Marca eventos como inativos no banco
                 GoogleEvent.objects.filter(
-                    user=user, google_event_id=google_event["id"]
+                    user=user, google_event_id=google_event.google_event_id
                 ).update(is_active=False)
             else:
-                logger.error(f"Erro ao deletar evento {google_event['id']}: {error}")
-
+                logger.error(
+                    f"Erro ao deletar evento {google_event.google_event_id}: {error}"
+                )
     return stats
 
 
-def _should_sync_event(insper_event: Dict, sync_config: SyncConfiguration) -> bool:
+def _should_sync_event(
+    insper_event: InsperEvent, sync_config: SyncConfiguration
+) -> bool:
     """
     Verifica se um evento deve ser sincronizado baseado nas configurações
 
     Args:
-        insper_event: Dados do evento do Insper
+        insper_event: Evento do Insper (objeto model)
         sync_config: Configuração de sincronização
 
     Returns:
         True se deve sincronizar
     """
     # Verifica tipo de evento
-    if not sync_config.should_sync_event_type(insper_event.get("tipo_evento", "")):
+    if not sync_config.should_sync_event_type(getattr(insper_event, "tipo_evento", "")):
         return False
 
     # Verifica disciplina
-    disciplina = insper_event.get("disciplina_codigo", "")
+    disciplina = getattr(insper_event, "disciplina_codigo", "")
     if disciplina and not sync_config.should_sync_discipline(disciplina):
         return False
 
@@ -573,13 +577,13 @@ def _save_insper_event(user: User, event_data: Dict) -> InsperEvent:
 
 
 def _event_needs_update(
-    insper_event: Dict, google_event: Dict, sync_config: SyncConfiguration
+    insper_event: InsperEvent, google_event: Dict, sync_config: SyncConfiguration
 ) -> bool:
     """
     Verifica se um evento do Google precisa ser atualizado
 
     Args:
-        insper_event: Dados do evento do Insper
+        insper_event: Evento do Insper (objeto model)
         google_event: Dados do evento do Google
         sync_config: Configuração de sincronização
 
@@ -604,14 +608,14 @@ def _event_needs_update(
         google_start_dt = datetime.fromisoformat(
             google_start["dateTime"].replace("Z", "+00:00")
         )
-        if google_start_dt != insper_event["start_datetime"]:
+        if google_start_dt != insper_event.start_datetime:
             return True
 
     if google_end.get("dateTime"):
         google_end_dt = datetime.fromisoformat(
             google_end["dateTime"].replace("Z", "+00:00")
         )
-        if google_end_dt != insper_event["end_datetime"]:
+        if google_end_dt != insper_event.end_datetime:
             return True
 
     return False
@@ -620,7 +624,7 @@ def _event_needs_update(
 def _create_google_event(
     client: GoogleCalendarClient,
     calendar_id: str,
-    insper_event: Dict,
+    insper_event: InsperEvent,
     sync_config: SyncConfiguration,
 ) -> Optional[Dict]:
     """
@@ -629,7 +633,7 @@ def _create_google_event(
     Args:
         client: Cliente do Google Calendar
         calendar_id: ID do calendário
-        insper_event: Dados do evento do Insper
+        insper_event: Evento do Insper (objeto model)
         sync_config: Configuração de sincronização
 
     Returns:
@@ -640,25 +644,25 @@ def _create_google_event(
             "summary": _format_event_title(insper_event, sync_config),
             "description": _format_event_description(insper_event, sync_config),
             "start": {
-                "dateTime": insper_event["start_datetime"].isoformat(),
+                "dateTime": insper_event.start_datetime.isoformat(),
                 "timeZone": "America/Sao_Paulo",
             },
             "end": {
-                "dateTime": insper_event["end_datetime"].isoformat(),
+                "dateTime": insper_event.end_datetime.isoformat(),
                 "timeZone": "America/Sao_Paulo",
             },
-            "location": insper_event.get("dependencia", ""),
+            "location": insper_event.dependencia or "",
             "source": {
                 "title": "Insper Sync",
                 "url": "https://sync.insper.dev",
             },
             "extendedProperties": {
                 "private": {
-                    "insper_event_id": insper_event["id"],
+                    "insper_event_id": insper_event.insper_event_id,
                     "sync_source": "insper",
-                    "disciplina_codigo": insper_event.get("disciplina_codigo", ""),
-                    "docente": insper_event.get("docente", ""),
-                    "turma": insper_event.get("turma", ""),
+                    "disciplina_codigo": insper_event.disciplina_codigo or "",
+                    "docente": insper_event.docente or "",
+                    "turma": insper_event.turma or "",
                 }
             },
         }
@@ -680,7 +684,7 @@ def _update_google_event(
     client: GoogleCalendarClient,
     calendar_id: str,
     google_event: Dict,
-    insper_event: Dict,
+    insper_event: InsperEvent,
     sync_config: SyncConfiguration,
 ) -> bool:
     """
@@ -690,7 +694,7 @@ def _update_google_event(
         client: Cliente do Google Calendar
         calendar_id: ID do calendário
         google_event: Evento existente do Google
-        insper_event: Dados atualizados do Insper
+        insper_event: Evento do Insper (objeto model)
         sync_config: Configuração de sincronização
 
     Returns:
@@ -701,21 +705,21 @@ def _update_google_event(
             "summary": _format_event_title(insper_event, sync_config),
             "description": _format_event_description(insper_event, sync_config),
             "start": {
-                "dateTime": insper_event["start_datetime"].isoformat(),
+                "dateTime": insper_event.start_datetime.isoformat(),
                 "timeZone": "America/Sao_Paulo",
             },
             "end": {
-                "dateTime": insper_event["end_datetime"].isoformat(),
+                "dateTime": insper_event.end_datetime.isoformat(),
                 "timeZone": "America/Sao_Paulo",
             },
-            "location": insper_event.get("dependencia", ""),
+            "location": insper_event.dependencia or "",
             "extendedProperties": {
                 "private": {
-                    "insper_event_id": insper_event["id"],
+                    "insper_event_id": insper_event.insper_event_id,
                     "sync_source": "insper",
-                    "disciplina_codigo": insper_event.get("disciplina_codigo", ""),
-                    "docente": insper_event.get("docente", ""),
-                    "turma": insper_event.get("turma", ""),
+                    "disciplina_codigo": insper_event.disciplina_codigo or "",
+                    "docente": insper_event.docente or "",
+                    "turma": insper_event.turma or "",
                 }
             },
         }
@@ -786,7 +790,7 @@ def _save_google_event(user: User, google_event: Dict) -> GoogleEvent:
 def _create_event_mapping(
     sync_session: SyncSession,
     insper_event: InsperEvent,
-    google_event: Dict,
+    google_event,
     status: str = "synced",
 ):
     """
@@ -800,13 +804,14 @@ def _create_event_mapping(
     """
     try:
         # Se google_event é um dict, busca ou cria o GoogleEvent
+        from .models import GoogleEvent as GoogleEventModel
+
         if isinstance(google_event, dict):
-            google_event_obj, _ = GoogleEvent.objects.get_or_create(
+            google_event_obj, _ = GoogleEventModel.objects.get_or_create(
                 user=insper_event.user, google_event_id=google_event["id"]
             )
         else:
             google_event_obj = google_event
-
         EventMapping.objects.get_or_create(
             insper_event=insper_event,
             google_event=google_event_obj,
@@ -820,18 +825,20 @@ def _create_event_mapping(
         logger.error(f"Erro ao criar mapeamento de evento: {str(e)}")
 
 
-def _format_event_title(insper_event: Dict, sync_config: SyncConfiguration) -> str:
+def _format_event_title(
+    insper_event: InsperEvent, sync_config: SyncConfiguration
+) -> str:
     """
     Formata título do evento conforme configurações
 
     Args:
-        insper_event: Dados do evento do Insper
+        insper_event: Evento do Insper (objeto model)
         sync_config: Configuração de sincronização
 
     Returns:
         Título formatado
     """
-    title = insper_event["title"]
+    title = insper_event.title
 
     if sync_config.add_insper_prefix:
         title = f"[Insper] {title}"
@@ -840,13 +847,13 @@ def _format_event_title(insper_event: Dict, sync_config: SyncConfiguration) -> s
 
 
 def _format_event_description(
-    insper_event: Dict, sync_config: SyncConfiguration
+    insper_event: InsperEvent, sync_config: SyncConfiguration
 ) -> str:
     """
     Formata descrição do evento conforme configurações
 
     Args:
-        insper_event: Dados do evento do Insper
+        insper_event: Evento do Insper (objeto model)
         sync_config: Configuração de sincronização
 
     Returns:
@@ -855,21 +862,23 @@ def _format_event_description(
     description_parts = []
 
     # Descrição original
-    if insper_event.get("description"):
-        description_parts.append(insper_event["description"])
+    if insper_event.description:
+        description_parts.append(insper_event.description)
 
     # Informações adicionais conforme configuração
-    if sync_config.include_discipline_code and insper_event.get("disciplina_codigo"):
-        description_parts.append(f"Disciplina: {insper_event['disciplina_codigo']}")
+    if sync_config.include_discipline_code and insper_event.disciplina_codigo:
+        description_parts.append(
+            f"Código da disciplina: {insper_event.disciplina_codigo}"
+        )
 
-    if sync_config.include_teacher_in_description and insper_event.get("docente"):
-        description_parts.append(f"Docente: {insper_event['docente']}")
+    if insper_event.docente:
+        description_parts.append(f"Docente: {insper_event.docente}")
 
-    if insper_event.get("turma"):
-        description_parts.append(f"Turma: {insper_event['turma']}")
+    if insper_event.turma:
+        description_parts.append(f"Turma: {insper_event.turma}")
 
-    if insper_event.get("dependencia"):
-        description_parts.append(f"Local: {insper_event['dependencia']}")
+    if insper_event.dependencia:
+        description_parts.append(f"Local: {insper_event.dependencia}")
 
     # Adiciona informações de sincronização
     description_parts.append("\n---")
